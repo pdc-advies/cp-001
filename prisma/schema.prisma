@@ -29,6 +29,9 @@ model Contract {
   invoiceEndDate   DateTime? @db.Date @map("invoice_end_date")
   debiteurnummer   String?   @map("debiteurnummer")
   kadastrale       String?   @map("kadastrale")
+  grootboek        String?   @map("grootboek")
+  btwCode          String?   @map("btw_code")
+  invoiceRef       String?   @map("invoice_ref")
   status           String    @default("draft")
   notes          String?
   createdAt      DateTime  @default(now()) @map("created_at")

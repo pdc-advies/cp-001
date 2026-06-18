@@ -248,7 +248,14 @@ export default function ContractsClient({ initialContracts, initialCustomers = [
           className="inline-flex items-center gap-2 px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
         >
           <Download className="w-4 h-4" />
-          Export
+          Export Excel
+        </a>
+        <a
+          href="/api/contracts/export/unit4"
+          className="inline-flex items-center gap-2 px-3 py-2 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+        >
+          <Download className="w-4 h-4" />
+          Export Unit4
         </a>
         <input
           ref={fileInputRef}

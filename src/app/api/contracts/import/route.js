@@ -100,6 +100,9 @@ export async function POST(request) {
         invoiceEndDate: parseDate(get(row, '25TOTFC')),
         debiteurnummer,
         kadastrale: toStr(get(row, '51KAD')),
+        grootboek: toStr(get(row, '70GBK')),
+        btwCode: toStr(get(row, '72BTW')),
+        invoiceRef: toStr(get(row, '60REF')),
         status: mapStatus(get(row, '11STAT')),
         notes: notes || null,
       })

@@ -33,6 +33,9 @@ export async function POST(request) {
         invoiceEndDate: body.invoiceEndDate ? new Date(body.invoiceEndDate) : null,
         debiteurnummer: body.debiteurnummer ?? null,
         kadastrale: body.kadastrale ?? null,
+        grootboek: body.grootboek ?? null,
+        btwCode: body.btwCode ?? null,
+        invoiceRef: body.invoiceRef ?? null,
         status: body.status || 'draft',
         notes: body.notes ?? null
       }
