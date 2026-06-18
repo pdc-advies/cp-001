@@ -51,8 +51,9 @@ function formatCurrency(value) {
   }).format(value)
 }
 
-export default function ContractsClient({ initialContracts }) {
+export default function ContractsClient({ initialContracts, initialCustomers = [] }) {
   const [contracts, setContracts] = useState(initialContracts)
+  const [customers, setCustomers] = useState(initialCustomers)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [typeFilter, setTypeFilter] = useState('all')
@@ -69,6 +70,12 @@ export default function ContractsClient({ initialContracts }) {
     const types = [...new Set(contracts.map(c => c.contractType).filter(Boolean))].sort()
     return types
   }, [contracts])
+
+  const customerMap = useMemo(() => {
+    const m = {}
+    for (const c of customers) m[c.debiteurnummer] = c
+    return m
+  }, [customers])
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
@@ -114,8 +121,12 @@ export default function ContractsClient({ initialContracts }) {
   const expandAll = () => setCollapsed(new Set())
 
   const refresh = useCallback(async () => {
-    const res = await fetch('/api/contracts')
-    if (res.ok) setContracts(await res.json())
+    const [cRes, kRes] = await Promise.all([
+      fetch('/api/contracts'),
+      fetch('/api/customers'),
+    ])
+    if (cRes.ok) setContracts(await cRes.json())
+    if (kRes.ok) setCustomers(await kRes.json())
   }, [])
 
   const openNew = () => setModal({ open: true, contract: null })
@@ -331,31 +342,43 @@ export default function ContractsClient({ initialContracts }) {
               return (
                 <tbody key={debiteur}>
                   {/* Group header row */}
-                  <tr
-                    onClick={() => toggleGroup(debiteur)}
-                    className="cursor-pointer bg-blue-50/40 hover:bg-blue-50 border-t border-blue-100 select-none"
-                  >
-                    <td colSpan={9} className="px-4 py-2.5">
-                      <div className="flex items-center gap-2">
-                        {isCollapsed
-                          ? <ChevronRight className="w-4 h-4 text-blue-400 shrink-0" />
-                          : <ChevronDown className="w-4 h-4 text-blue-400 shrink-0" />
-                        }
-                        <span className="font-semibold text-gray-800">{debiteur}</span>
-                        <span className="text-gray-400 text-xs">
-                          {groupContracts.length} {groupContracts.length === 1 ? 'contract' : 'contracten'}
-                        </span>
-                        {totalM2 > 0 && (
-                          <span className="text-gray-400 text-xs">
-                            · {new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 0 }).format(totalM2)} m²
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="sticky right-0 bg-blue-50/60 px-4 py-2.5 text-right font-semibold text-gray-700 whitespace-nowrap shadow-[-8px_0_8px_-4px_rgba(0,0,0,0.04)]">
-                      {totalJaarprijs > 0 ? formatCurrency(totalJaarprijs) : '—'}
-                    </td>
-                  </tr>
+                  {(() => {
+                    const customer = customerMap[debiteur]
+                    const addressLine = [customer?.address, customer?.city].filter(Boolean).join(', ')
+                    return (
+                      <tr
+                        onClick={() => toggleGroup(debiteur)}
+                        className="cursor-pointer bg-blue-50/40 hover:bg-blue-50 border-t border-blue-100 select-none"
+                      >
+                        <td colSpan={9} className="px-4 py-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {isCollapsed
+                              ? <ChevronRight className="w-4 h-4 text-blue-400 shrink-0" />
+                              : <ChevronDown className="w-4 h-4 text-blue-400 shrink-0" />
+                            }
+                            <span className="font-semibold text-gray-800">{debiteur}</span>
+                            {customer && (
+                              <span className="font-medium text-gray-700">{customer.name}</span>
+                            )}
+                            {addressLine && (
+                              <span className="text-gray-400 text-xs">{addressLine}</span>
+                            )}
+                            <span className="text-gray-400 text-xs">
+                              · {groupContracts.length} {groupContracts.length === 1 ? 'contract' : 'contracten'}
+                            </span>
+                            {totalM2 > 0 && (
+                              <span className="text-gray-400 text-xs">
+                                · {new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 0 }).format(totalM2)} m²
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="sticky right-0 bg-blue-50/60 px-4 py-2 text-right font-semibold text-gray-700 whitespace-nowrap shadow-[-8px_0_8px_-4px_rgba(0,0,0,0.04)]">
+                          {totalJaarprijs > 0 ? formatCurrency(totalJaarprijs) : '—'}
+                        </td>
+                      </tr>
+                    )
+                  })()}
                   {/* Contract rows */}
                   {!isCollapsed && groupContracts.map(contract => (
                     <tr key={contract.id} className="hover:bg-gray-50 transition-colors border-t border-gray-100">
