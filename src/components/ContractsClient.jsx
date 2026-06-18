@@ -335,7 +335,7 @@ export default function ContractsClient({ initialContracts }) {
                     onClick={() => toggleGroup(debiteur)}
                     className="cursor-pointer bg-blue-50/40 hover:bg-blue-50 border-t border-blue-100 select-none"
                   >
-                    <td colSpan={8} className="px-4 py-2.5">
+                    <td colSpan={9} className="px-4 py-2.5">
                       <div className="flex items-center gap-2">
                         {isCollapsed
                           ? <ChevronRight className="w-4 h-4 text-blue-400 shrink-0" />
@@ -352,10 +352,9 @@ export default function ContractsClient({ initialContracts }) {
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-2.5 text-right font-semibold text-gray-700 whitespace-nowrap">
+                    <td className="sticky right-0 bg-blue-50/60 px-4 py-2.5 text-right font-semibold text-gray-700 whitespace-nowrap shadow-[-8px_0_8px_-4px_rgba(0,0,0,0.04)]">
                       {totalJaarprijs > 0 ? formatCurrency(totalJaarprijs) : '—'}
                     </td>
-                    <td className="sticky right-0 bg-blue-50/60 shadow-[-8px_0_8px_-4px_rgba(0,0,0,0.04)]" />
                   </tr>
                   {/* Contract rows */}
                   {!isCollapsed && groupContracts.map(contract => (
