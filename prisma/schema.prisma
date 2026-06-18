@@ -29,7 +29,7 @@ model Contract {
   invoiceEndDate   DateTime? @db.Date @map("invoice_end_date")
   debiteurnummer   String?   @map("debiteurnummer")
   kadastrale       String?   @map("kadastrale")
-  grootboekNieuw   String?   @map("grootboek_nieuw")
+  grootboekNieuw   String?   @map("grootboek")
   grootboekOud     String?   @map("grootboek_oud")
   btwCode          String?   @map("btw_code")
   invoiceRef       String?   @map("invoice_ref")
