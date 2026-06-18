@@ -5,6 +5,7 @@ from fastapi import Depends, FastAPI, Form, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.database import Base, SessionLocal, engine, get_db
@@ -51,7 +52,7 @@ def list_contracts(request: Request, search: Optional[str] = None, status: Optio
     query = db.query(Contract)
     if search:
         like = f"%{search}%"
-        query = query.filter(Contract.contract_number.ilike(like) | Contract.customer_name.ilike(like) | Contract.description.ilike(like) | Contract.kostenplaats.ilike(like))
+        query = query.filter(or_(Contract.contract_number.ilike(like), Contract.customer_name.ilike(like), Contract.description.ilike(like), Contract.kostenplaats.ilike(like)))
     if status and status != "all":
         query = query.filter(Contract.status == status)
     contracts = query.order_by(Contract.id.desc()).all()
