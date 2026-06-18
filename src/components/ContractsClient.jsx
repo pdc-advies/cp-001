@@ -314,7 +314,7 @@ export default function ContractsClient({ initialContracts }) {
                 <th className="text-right px-4 py-3 font-medium text-gray-500 whitespace-nowrap">m²</th>
                 <th className="text-right px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Prijs/m²</th>
                 <th className="text-right px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Jaarprijs</th>
-                <th className="px-4 py-3 w-20" />
+                <th className="sticky right-0 bg-gray-50 px-4 py-3 w-20 shadow-[-8px_0_8px_-4px_rgba(0,0,0,0.04)]" />
               </tr>
             </thead>
             {grouped.length === 0 ? (
@@ -355,7 +355,7 @@ export default function ContractsClient({ initialContracts }) {
                     <td className="px-4 py-2.5 text-right font-semibold text-gray-700 whitespace-nowrap">
                       {totalJaarprijs > 0 ? formatCurrency(totalJaarprijs) : '—'}
                     </td>
-                    <td />
+                    <td className="sticky right-0 bg-blue-50/60 shadow-[-8px_0_8px_-4px_rgba(0,0,0,0.04)]" />
                   </tr>
                   {/* Contract rows */}
                   {!isCollapsed && groupContracts.map(contract => (
@@ -389,7 +389,7 @@ export default function ContractsClient({ initialContracts }) {
                           ? formatCurrency(contract.m2 * contract.pricePerM2)
                           : formatCurrency(contract.contractValue)}
                       </td>
-                      <td className="px-4 py-2.5">
+                      <td className="sticky right-0 bg-white px-4 py-2.5 shadow-[-8px_0_8px_-4px_rgba(0,0,0,0.04)]">
                         <div className="flex items-center justify-end gap-0.5">
                           <a
                             href={`/contracts/${contract.id}`}
