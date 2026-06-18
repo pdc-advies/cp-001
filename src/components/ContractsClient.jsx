@@ -170,6 +170,9 @@ export default function ContractsClient({ initialContracts }) {
                 <th className="text-left px-4 py-3 font-medium text-gray-500">Status</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Startdatum</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Einddatum</th>
+                <th className="text-right px-4 py-3 font-medium text-gray-500 whitespace-nowrap">m²</th>
+                <th className="text-right px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Prijs/m²</th>
+                <th className="text-right px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Basisprijs</th>
                 <th className="text-right px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Waarde</th>
                 <th className="px-4 py-3 w-20" />
               </tr>
@@ -177,7 +180,7 @@ export default function ContractsClient({ initialContracts }) {
             <tbody className="divide-y divide-gray-100">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-16 text-center">
+                  <td colSpan={11} className="px-4 py-16 text-center">
                     <FileText className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                     <p className="text-gray-400 text-sm">Geen contracten gevonden</p>
                   </td>
@@ -195,6 +198,17 @@ export default function ContractsClient({ initialContracts }) {
                     </td>
                     <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{formatDate(contract.startDate)}</td>
                     <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{formatDate(contract.endDate)}</td>
+                    <td className="px-4 py-3 text-right text-gray-500 whitespace-nowrap">
+                      {contract.m2 != null ? new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 1 }).format(contract.m2) : '—'}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-500 whitespace-nowrap">
+                      {contract.pricePerM2 != null ? new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }).format(contract.pricePerM2) : '—'}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-600 whitespace-nowrap">
+                      {(contract.m2 != null && contract.pricePerM2 != null)
+                        ? formatCurrency(contract.m2 * contract.pricePerM2)
+                        : '—'}
+                    </td>
                     <td className="px-4 py-3 text-right text-gray-700 font-medium whitespace-nowrap">
                       {formatCurrency(contract.contractValue)}
                     </td>

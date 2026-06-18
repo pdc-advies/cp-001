@@ -15,6 +15,9 @@ export async function PUT(request, { params }) {
         startDate: new Date(body.startDate),
         endDate: body.endDate ? new Date(body.endDate) : null,
         contractValue: body.contractValue ?? null,
+        m2: body.m2 ?? null,
+        pricePerM2: body.pricePerM2 ?? null,
+        priceIndex: body.priceIndex ?? null,
         status: body.status || 'draft',
         notes: body.notes ?? null
       }

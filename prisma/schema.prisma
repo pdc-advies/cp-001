@@ -16,6 +16,9 @@ model Contract {
   startDate      DateTime  @db.Date @map("start_date")
   endDate        DateTime? @db.Date @map("end_date")
   contractValue  Float?    @map("contract_value")
+  m2             Float?    @map("m2")
+  pricePerM2     Float?    @map("price_per_m2")
+  priceIndex     Float?    @map("price_index")
   status         String    @default("draft")
   notes          String?
   createdAt      DateTime  @default(now()) @map("created_at")

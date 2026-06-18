@@ -16,6 +16,11 @@ export async function GET() {
     { header: 'Omschrijving', key: 'description', width: 45 },
     { header: 'Startdatum', key: 'startDate', width: 15 },
     { header: 'Einddatum', key: 'endDate', width: 15 },
+    { header: 'm²', key: 'm2', width: 12 },
+    { header: 'Prijs/m²', key: 'pricePerM2', width: 15 },
+    { header: 'Basisprijs', key: 'basePrice', width: 15 },
+    { header: 'Index', key: 'priceIndex', width: 12 },
+    { header: 'Geïndexeerde prijs', key: 'indexedPrice', width: 20 },
     { header: 'Waarde', key: 'contractValue', width: 15 },
     { header: 'Status', key: 'status', width: 12 },
     { header: 'Notities', key: 'notes', width: 35 }
@@ -24,6 +29,8 @@ export async function GET() {
   sheet.getRow(1).font = { bold: true }
 
   for (const c of contracts) {
+    const basePrice = (c.m2 != null && c.pricePerM2 != null) ? c.m2 * c.pricePerM2 : null
+    const indexedPrice = (basePrice != null && c.priceIndex != null) ? basePrice * c.priceIndex : null
     sheet.addRow({
       contractNumber: c.contractNumber,
       customerName: c.customerName,
@@ -31,6 +38,11 @@ export async function GET() {
       description: c.description ?? '',
       startDate: c.startDate ? new Date(c.startDate).toLocaleDateString('nl-NL') : '',
       endDate: c.endDate ? new Date(c.endDate).toLocaleDateString('nl-NL') : '',
+      m2: c.m2,
+      pricePerM2: c.pricePerM2,
+      basePrice,
+      priceIndex: c.priceIndex,
+      indexedPrice,
       contractValue: c.contractValue,
       status: c.status,
       notes: c.notes ?? ''

@@ -11,6 +11,9 @@ const EMPTY_FORM = {
   startDate: '',
   endDate: '',
   contractValue: '',
+  m2: '',
+  pricePerM2: '',
+  priceIndex: '',
   status: 'draft',
   notes: ''
 }
@@ -47,6 +50,9 @@ export default function ContractModal({ contract, onClose, onSave }) {
           ? new Date(contract.endDate).toISOString().split('T')[0]
           : '',
         contractValue: contract.contractValue ?? '',
+        m2: contract.m2 ?? '',
+        pricePerM2: contract.pricePerM2 ?? '',
+        priceIndex: contract.priceIndex ?? '',
         status: contract.status || 'draft',
         notes: contract.notes || ''
       })
@@ -66,6 +72,9 @@ export default function ContractModal({ contract, onClose, onSave }) {
       const body = {
         ...form,
         contractValue: form.contractValue !== '' ? parseFloat(form.contractValue) : null,
+        m2: form.m2 !== '' ? parseFloat(form.m2) : null,
+        pricePerM2: form.pricePerM2 !== '' ? parseFloat(form.pricePerM2) : null,
+        priceIndex: form.priceIndex !== '' ? parseFloat(form.priceIndex) : null,
         endDate: form.endDate || null,
         kostenplaats: form.kostenplaats || null,
         description: form.description || null,
@@ -173,6 +182,68 @@ export default function ContractModal({ contract, onClose, onSave }) {
             />
           </Field>
         </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          <Field label="Oppervlakte (m²)">
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={form.m2}
+              onChange={set('m2')}
+              placeholder="0"
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Prijs per m² (€)">
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={form.pricePerM2}
+              onChange={set('pricePerM2')}
+              placeholder="0"
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Index">
+            <input
+              type="number"
+              step="0.0001"
+              min="0"
+              value={form.priceIndex}
+              onChange={set('priceIndex')}
+              placeholder="bv. 1.05"
+              className={inputClass}
+            />
+          </Field>
+        </div>
+
+        {(form.m2 !== '' && form.pricePerM2 !== '') && (() => {
+          const m2 = parseFloat(form.m2) || 0
+          const ppm2 = parseFloat(form.pricePerM2) || 0
+          const idx = parseFloat(form.priceIndex) || null
+          const base = m2 * ppm2
+          const indexed = idx ? base * idx : null
+          return (
+            <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 text-sm space-y-1">
+              <div className="flex justify-between">
+                <span className="text-blue-700">Basisprijs (m² × prijs/m²)</span>
+                <span className="font-semibold text-blue-900">
+                  {new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }).format(base)}
+                </span>
+              </div>
+              {indexed != null && (
+                <div className="flex justify-between">
+                  <span className="text-blue-700">Geïndexeerde prijs (× {form.priceIndex})</span>
+                  <span className="font-semibold text-blue-900">
+                    {new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }).format(indexed)}
+                  </span>
+                </div>
+              )}
+            </div>
+          )
+        })()}
 
         <div className="grid grid-cols-2 gap-4">
           <Field label="Waarde (€)">
