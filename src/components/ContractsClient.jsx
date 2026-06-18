@@ -333,8 +333,7 @@ export default function ContractsClient({ initialContracts, initialCustomers = [
                 <th className="text-left px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Startdatum</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Einddatum</th>
                 <th className="text-right px-4 py-3 font-medium text-gray-500 whitespace-nowrap">m²</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Jaarprijs</th>
-                <th className="sticky right-0 bg-gray-50 px-4 py-3 w-20 shadow-[-8px_0_8px_-4px_rgba(0,0,0,0.04)]" />
+                <th className="sticky right-0 bg-gray-50 px-4 py-3 text-right font-medium text-gray-500 whitespace-nowrap shadow-[-8px_0_8px_-4px_rgba(0,0,0,0.04)]">Jaarprijs</th>
               </tr>
             </thead>
             {grouped.length === 0 ? (
@@ -410,13 +409,13 @@ export default function ContractsClient({ initialContracts, initialCustomers = [
                           ? new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 0 }).format(contract.m2)
                           : '—'}
                       </td>
-                      <td className="px-4 py-2.5 text-right text-gray-700 font-medium whitespace-nowrap">
-                        {contract.m2 != null && contract.pricePerM2 != null
-                          ? formatCurrency(contract.m2 * contract.pricePerM2)
-                          : formatCurrency(contract.contractValue)}
-                      </td>
-                      <td className="sticky right-0 bg-white px-4 py-2.5 shadow-[-8px_0_8px_-4px_rgba(0,0,0,0.04)]">
-                        <div className="flex items-center justify-end gap-0.5">
+                      <td className="sticky right-0 bg-white px-3 py-2.5 shadow-[-8px_0_8px_-4px_rgba(0,0,0,0.04)]">
+                        <div className="flex items-center justify-end gap-1">
+                          <span className="text-sm font-medium text-gray-700 whitespace-nowrap mr-1">
+                            {contract.m2 != null && contract.pricePerM2 != null
+                              ? formatCurrency(contract.m2 * contract.pricePerM2)
+                              : formatCurrency(contract.contractValue)}
+                          </span>
                           <a
                             href={`/contracts/${contract.id}`}
                             className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
