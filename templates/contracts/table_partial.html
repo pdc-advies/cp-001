@@ -1,0 +1,4 @@
+<table id="contract-table">
+  <thead><tr><th>Contract Nr</th><th>Klant</th><th>Kostenplaats</th><th>Status</th><th>Startdatum</th><th>Einddatum</th><th>Waarde</th><th>Acties</th></tr></thead>
+  <tbody>{% for contract in contracts %}{% include 'contracts/row.html' %}{% endfor %}</tbody>
+</table>

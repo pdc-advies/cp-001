@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="toolbar">
+  <h1>Contracten</h1>
+  <input type="search" name="search" placeholder="Zoeken..." value="{{ search }}" hx-get="/contracts" hx-target="#contract-table" hx-select="#contract-table" hx-swap="outerHTML" hx-trigger="keyup changed delay:300ms" hx-include="[name='status']" style="max-width: 280px;" />
+  <select name="status" hx-get="/contracts" hx-target="#contract-table" hx-select="#contract-table" hx-swap="outerHTML" hx-trigger="change" hx-include="[name='search']" style="max-width: 180px;">
+    <option value="all" {% if status == 'all' %}selected{% endif %}>Alle statussen</option>
+    <option value="active" {% if status == 'active' %}selected{% endif %}>Actief</option>
+    <option value="expired" {% if status == 'expired' %}selected{% endif %}>Verlopen</option>
+    <option value="draft" {% if status == 'draft' %}selected{% endif %}>Concept</option>
+  </select>
+  <button hx-get="/contracts/new" hx-target="#modal-body" hx-swap="innerHTML" @click="$dispatch('open-modal')">+ Nieuw contract</button>
+  <a href="/contracts/export/excel" role="button" class="outline">Export Excel</a>
+  <button class="outline secondary" hx-get="/contracts/export/unit4" hx-target="#toast-container" hx-swap="innerHTML">Export Unit4</button>
+</div>
+<table id="contract-table">
+  <thead><tr><th>Contract Nr</th><th>Klant</th><th>Kostenplaats</th><th>Status</th><th>Startdatum</th><th>Einddatum</th><th>Waarde</th><th>Acties</th></tr></thead>
+  <tbody>{% for contract in contracts %}{% include 'contracts/row.html' %}{% endfor %}</tbody>
+</table>
+{% endblock %}
