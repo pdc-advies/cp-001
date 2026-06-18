@@ -57,13 +57,13 @@ def list_contracts(request: Request, search: Optional[str] = None, status: Optio
         query = query.filter(Contract.status == status)
     contracts = query.order_by(Contract.id.desc()).all()
     if request.headers.get("hx-request"):
-        return templates.TemplateResponse("contracts/table_partial.html", {"request": request, "contracts": contracts})
-    return templates.TemplateResponse("contracts/list.html", {"request": request, "contracts": contracts, "search": search or "", "status": status or "all"})
+        return templates.TemplateResponse(request=request, name="contracts/table_partial.html", context={"contracts": contracts})
+    return templates.TemplateResponse(request=request, name="contracts/list.html", context={"contracts": contracts, "search": search or "", "status": status or "all"})
 
 
 @app.get("/contracts/new", response_class=HTMLResponse)
 def new_contract_form(request: Request):
-    return templates.TemplateResponse("contracts/form.html", {"request": request, "contract": None})
+    return templates.TemplateResponse(request=request, name="contracts/form.html", context={"contract": None})
 
 
 @app.get("/contracts/export/excel")
@@ -83,7 +83,7 @@ def edit_contract_form(contract_id: int, request: Request, db: Session = Depends
     contract = db.query(Contract).filter(Contract.id == contract_id).first()
     if not contract:
         return HTMLResponse(content="Contract niet gevonden", status_code=404)
-    return templates.TemplateResponse("contracts/form.html", {"request": request, "contract": contract})
+    return templates.TemplateResponse(request=request, name="contracts/form.html", context={"contract": contract})
 
 
 @app.post("/contracts", response_class=HTMLResponse)
@@ -92,7 +92,7 @@ def create_contract(request: Request, contract_number: str = Form(...), customer
     db.add(contract)
     db.commit()
     db.refresh(contract)
-    response = templates.TemplateResponse("contracts/row.html", {"request": request, "contract": contract})
+    response = templates.TemplateResponse(request=request, name="contracts/row.html", context={"contract": contract})
     response.headers["HX-Trigger"] = "closeModal"
     return response
 
@@ -113,7 +113,7 @@ def update_contract(contract_id: int, request: Request, contract_number: str = F
     contract.notes = notes
     db.commit()
     db.refresh(contract)
-    response = templates.TemplateResponse("contracts/row.html", {"request": request, "contract": contract})
+    response = templates.TemplateResponse(request=request, name="contracts/row.html", context={"contract": contract})
     response.headers["HX-Trigger"] = "closeModal"
     return response
 
