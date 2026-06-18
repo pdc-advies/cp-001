@@ -333,7 +333,6 @@ export default function ContractsClient({ initialContracts, initialCustomers = [
                 <th className="text-left px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Startdatum</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Einddatum</th>
                 <th className="text-right px-4 py-3 font-medium text-gray-500 whitespace-nowrap">m²</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Prijs/m²</th>
                 <th className="text-right px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Jaarprijs</th>
                 <th className="sticky right-0 bg-gray-50 px-4 py-3 w-20 shadow-[-8px_0_8px_-4px_rgba(0,0,0,0.04)]" />
               </tr>
@@ -360,7 +359,7 @@ export default function ContractsClient({ initialContracts, initialCustomers = [
                         onClick={() => toggleGroup(debiteur)}
                         className="cursor-pointer bg-blue-50/40 hover:bg-blue-50 border-t border-blue-100 select-none"
                       >
-                        <td colSpan={9} className="px-4 py-2">
+                        <td colSpan={8} className="px-4 py-2">
                           <div className="flex items-center gap-2 flex-wrap">
                             {isCollapsed
                               ? <ChevronRight className="w-4 h-4 text-blue-400 shrink-0" />
@@ -409,11 +408,6 @@ export default function ContractsClient({ initialContracts, initialCustomers = [
                       <td className="px-4 py-2.5 text-right text-gray-600 whitespace-nowrap">
                         {contract.m2 != null
                           ? new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 0 }).format(contract.m2)
-                          : '—'}
-                      </td>
-                      <td className="px-4 py-2.5 text-right text-gray-600 whitespace-nowrap">
-                        {contract.pricePerM2 != null
-                          ? new Intl.NumberFormat('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(contract.pricePerM2)
                           : '—'}
                       </td>
                       <td className="px-4 py-2.5 text-right text-gray-700 font-medium whitespace-nowrap">
