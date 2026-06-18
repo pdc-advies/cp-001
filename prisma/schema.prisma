@@ -1,0 +1,25 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Contract {
+  id             Int       @id @default(autoincrement())
+  contractNumber String    @unique @map("contract_number")
+  customerName   String    @map("customer_name")
+  kostenplaats   String?
+  description    String?
+  startDate      DateTime  @db.Date @map("start_date")
+  endDate        DateTime? @db.Date @map("end_date")
+  contractValue  Float?    @map("contract_value")
+  status         String    @default("draft")
+  notes          String?
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@map("contracts")
+}
