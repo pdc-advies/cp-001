@@ -1,0 +1,30 @@
+{% if contract %}
+<form hx-put="/contracts/{{ contract.id }}" hx-target="[data-row-id='{{ contract.id }}']" hx-swap="outerHTML" hx-encoding="application/x-www-form-urlencoded">
+{% else %}
+<form hx-post="/contracts" hx-target="#contract-table tbody" hx-swap="beforeend">
+{% endif %}
+  <h2>{% if contract %}Contract bewerken{% else %}Nieuw contract{% endif %}</h2>
+  <label>Contractnummer *<input type="text" name="contract_number" value="{{ contract.contract_number if contract else '' }}" required placeholder="CNT-2025-001" /></label>
+  <label>Klantnaam *<input type="text" name="customer_name" value="{{ contract.customer_name if contract else '' }}" required placeholder="Naam klant" /></label>
+  <label>Kostenplaats<input type="text" name="kostenplaats" value="{{ contract.kostenplaats if contract else '' }}" placeholder="KP-100, KP-200" /></label>
+  <label>Omschrijving<textarea name="description" placeholder="Omschrijving van het contract...">{{ contract.description if contract else '' }}</textarea></label>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+    <label>Startdatum *<input type="date" name="start_date" value="{{ contract.start_date.isoformat() if contract and contract.start_date else '' }}" required /></label>
+    <label>Einddatum<input type="date" name="end_date" value="{{ contract.end_date.isoformat() if contract and contract.end_date else '' }}" /></label>
+  </div>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+    <label>Waarde (€)<input type="number" name="contract_value" step="0.01" min="0" value="{{ contract.contract_value if contract else '' }}" placeholder="0.00" /></label>
+    <label>Status
+      <select name="status">
+        <option value="draft" {% if not contract or contract.status == 'draft' %}selected{% endif %}>Concept</option>
+        <option value="active" {% if contract and contract.status == 'active' %}selected{% endif %}>Actief</option>
+        <option value="expired" {% if contract and contract.status == 'expired' %}selected{% endif %}>Verlopen</option>
+      </select>
+    </label>
+  </div>
+  <label>Notities<textarea name="notes" placeholder="Aanvullende opmerkingen...">{{ contract.notes if contract else '' }}</textarea></label>
+  <div style="display:flex; gap:1rem; justify-content:flex-end; margin-top:1rem;">
+    <button type="button" class="outline secondary" @click="$dispatch('close-modal')">Annuleren</button>
+    <button type="submit">{% if contract %}Opslaan{% else %}Aanmaken{% endif %}</button>
+  </div>
+</form>

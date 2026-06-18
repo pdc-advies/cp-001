@@ -1,0 +1,10 @@
+.badge-active { background: #2d8a4e; color: white; padding: 2px 8px; border-radius: 4px; font-size: .8em; display: inline-block; }
+.badge-expired { background: #888; color: white; padding: 2px 8px; border-radius: 4px; font-size: .8em; display: inline-block; }
+.badge-draft { background: #e07b00; color: white; padding: 2px 8px; border-radius: 4px; font-size: .8em; display: inline-block; }
+.toast-info { background: #d0e8ff; border: 1px solid #4a90d9; padding: .75rem 1rem; border-radius: 6px; margin-top: .5rem; }
+#toast-container { position: fixed; bottom: 1rem; right: 1rem; z-index: 1000; min-width: 250px; }
+.toolbar { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+.toolbar h1 { margin: 0; flex: 1; }
+dialog article { min-width: 520px; max-width: 720px; margin: auto; }
+dialog article header { display: flex; justify-content: flex-end; padding-bottom: 0; margin-bottom: 0; border-bottom: none; }
+nav { border-bottom: 1px solid var(--pico-muted-border-color); margin-bottom: 1.5rem; }
