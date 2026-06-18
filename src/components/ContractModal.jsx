@@ -24,6 +24,10 @@ const EMPTY_FORM = {
   basePricePerM2: '',
   baseIndexYear: '',
   indexSeries: '',
+  grootboekNieuw: '',
+  grootboekOud: '',
+  btwCode: '',
+  invoiceRef: '',
   status: 'draft',
   notes: ''
 }
@@ -75,6 +79,10 @@ export default function ContractModal({ contract, onClose, onSave }) {
           ? new Date(contract.invoiceStartDate).toISOString().split('T')[0] : '',
         invoiceEndDate: contract.invoiceEndDate
           ? new Date(contract.invoiceEndDate).toISOString().split('T')[0] : '',
+        grootboekNieuw: contract.grootboekNieuw ?? '',
+        grootboekOud: contract.grootboekOud ?? '',
+        btwCode: contract.btwCode ?? '',
+        invoiceRef: contract.invoiceRef ?? '',
         status: contract.status || 'draft',
         notes: contract.notes || ''
       })
@@ -110,6 +118,10 @@ export default function ContractModal({ contract, onClose, onSave }) {
         kadastrale: form.kadastrale || null,
         indexSeries: form.indexSeries || null,
         description: form.description || null,
+        grootboekNieuw: form.grootboekNieuw || null,
+        grootboekOud: form.grootboekOud || null,
+        btwCode: form.btwCode || null,
+        invoiceRef: form.invoiceRef || null,
         notes: form.notes || null
       }
       const url = contract ? `/api/contracts/${contract.id}` : '/api/contracts'
@@ -337,6 +349,26 @@ export default function ContractModal({ contract, onClose, onSave }) {
               <option value="expired">Verlopen</option>
             </select>
           </Field>
+        </div>
+
+        <div className="border-t border-gray-100 pt-4">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Boekhoudkundige gegevens</p>
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <Field label="Grootboek nieuw">
+              <input type="text" value={form.grootboekNieuw} onChange={set('grootboekNieuw')} placeholder="82000" className={inputClass} />
+            </Field>
+            <Field label="Grootboek oud">
+              <input type="text" value={form.grootboekOud} onChange={set('grootboekOud')} placeholder="oud rekeningnummer" className={inputClass} />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="BTW code">
+              <input type="text" value={form.btwCode} onChange={set('btwCode')} placeholder="bijv. 0, V21" className={inputClass} />
+            </Field>
+            <Field label="Referentie factuur">
+              <input type="text" value={form.invoiceRef} onChange={set('invoiceRef')} placeholder="Erfpacht #Ke kwartaal #J" className={inputClass} />
+            </Field>
+          </div>
         </div>
 
         <Field label="Notities">

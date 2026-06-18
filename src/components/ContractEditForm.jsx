@@ -30,7 +30,7 @@ function formatCurrency(v) {
   return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }).format(v)
 }
 
-export default function ContractEditForm({ contract, customers }) {
+export default function ContractEditForm({ contract, customers, btwCodes = [] }) {
   const router = useRouter()
 
   const [form, setForm] = useState({
@@ -54,7 +54,8 @@ export default function ContractEditForm({ contract, customers }) {
     indexSeries: contract.indexSeries ?? '',
     priceIndex: contract.priceIndex ?? '',
     contractValue: contract.contractValue ?? '',
-    grootboek: contract.grootboek ?? '',
+    grootboekNieuw: contract.grootboekNieuw ?? '',
+    grootboekOud: contract.grootboekOud ?? '',
     btwCode: contract.btwCode ?? '',
     invoiceRef: contract.invoiceRef ?? '',
     notes: contract.notes ?? '',
@@ -68,7 +69,10 @@ export default function ContractEditForm({ contract, customers }) {
   // Customer lookup
   const customerMap = useMemo(() => {
     const m = {}
-    for (const c of customers) m[c.debiteurnummer] = c
+    for (const c of customers) {
+      m[c.debiteurnummer] = c
+      if (c.debiteurnummerOud) m[c.debiteurnummerOud] = c
+    }
     return m
   }, [customers])
 
@@ -105,7 +109,8 @@ export default function ContractEditForm({ contract, customers }) {
         kadastrale: form.kadastrale || null,
         indexSeries: form.indexSeries || null,
         description: form.description || null,
-        grootboek: form.grootboek || null,
+        grootboekNieuw: form.grootboekNieuw || null,
+        grootboekOud: form.grootboekOud || null,
         btwCode: form.btwCode || null,
         invoiceRef: form.invoiceRef || null,
         notes: form.notes || null,
@@ -252,14 +257,31 @@ export default function ContractEditForm({ contract, customers }) {
 
         {/* Boekhoudkundige gegevens */}
         <Section title="Boekhoudkundige gegevens">
-          <div className="grid grid-cols-3 gap-4">
-            <Field label="Grootboek (70GBK)">
-              <input type="text" value={form.grootboek} onChange={set('grootboek')} placeholder="82000" className={inputClass} />
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Grootboek nieuw">
+              <input type="text" value={form.grootboekNieuw} onChange={set('grootboekNieuw')} placeholder="82000" className={inputClass} />
             </Field>
-            <Field label="BTW code (72BTW)">
-              <input type="text" value={form.btwCode} onChange={set('btwCode')} placeholder="0" className={inputClass} />
+            <Field label="Grootboek oud">
+              <input type="text" value={form.grootboekOud} onChange={set('grootboekOud')} placeholder="oud rekeningnummer" className={inputClass} />
             </Field>
-            <Field label="Referentie factuur (60REF)">
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="BTW code">
+              <input
+                type="text"
+                value={form.btwCode}
+                onChange={set('btwCode')}
+                list="btw-list"
+                placeholder="bijv. 0, V21, vrijgesteld"
+                className={inputClass}
+              />
+              <datalist id="btw-list">
+                {btwCodes.map(b => (
+                  <option key={b.id} value={b.code}>{b.code} — {b.description}{b.percentage != null ? ` (${b.percentage}%)` : ''}</option>
+                ))}
+              </datalist>
+            </Field>
+            <Field label="Referentie factuur">
               <input type="text" value={form.invoiceRef} onChange={set('invoiceRef')} placeholder="Erfpacht #Ke kwartaal #J" className={inputClass} />
             </Field>
           </div>

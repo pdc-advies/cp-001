@@ -21,6 +21,7 @@ export default function Nav() {
     <nav className="flex items-center gap-1 ml-6">
       {link('/', 'Contracten')}
       {link('/customers', 'Klanten')}
+      {link('/btw-codes', 'BTW Codes')}
     </nav>
   )
 }

@@ -72,7 +72,8 @@ export default function CustomersClient({ initialCustomers }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200 bg-gray-50">
-              <th className="text-left px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Debiteurnummer</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Deb.nr (nieuw)</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Deb.nr (oud)</th>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Naam</th>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Adres</th>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Stad</th>
@@ -92,6 +93,7 @@ export default function CustomersClient({ initialCustomers }) {
             ) : filtered.map(c => (
               <tr key={c.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-4 py-3 font-mono font-medium text-gray-800">{c.debiteurnummer}</td>
+                <td className="px-4 py-3 font-mono text-gray-400">{c.debiteurnummerOud || '—'}</td>
                 <td className="px-4 py-3 text-gray-700 font-medium">{c.name}</td>
                 <td className="px-4 py-3 text-gray-500">{c.address || '—'}</td>
                 <td className="px-4 py-3 text-gray-500">{c.city || '—'}</td>

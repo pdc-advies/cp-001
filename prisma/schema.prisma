@@ -29,7 +29,8 @@ model Contract {
   invoiceEndDate   DateTime? @db.Date @map("invoice_end_date")
   debiteurnummer   String?   @map("debiteurnummer")
   kadastrale       String?   @map("kadastrale")
-  grootboek        String?   @map("grootboek")
+  grootboekNieuw   String?   @map("grootboek_nieuw")
+  grootboekOud     String?   @map("grootboek_oud")
   btwCode          String?   @map("btw_code")
   invoiceRef       String?   @map("invoice_ref")
   status           String    @default("draft")
@@ -40,10 +41,21 @@ model Contract {
   @@map("contracts")
 }
 
+model BtwCode {
+  id          Int     @id @default(autoincrement())
+  code        String  @unique
+  description String
+  percentage  Float?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("btw_codes")
+}
+
 model Customer {
-  id             Int      @id @default(autoincrement())
-  debiteurnummer String   @unique @map("debiteurnummer")
-  name           String
+  id                Int      @id @default(autoincrement())
+  debiteurnummer    String   @unique @map("debiteurnummer")
+  debiteurnummerOud String?  @map("debiteurnummer_oud")
+  name              String
   address        String?
   city           String?
   email          String?

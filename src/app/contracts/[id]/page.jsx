@@ -9,10 +9,13 @@ function serializeDate(d) {
 }
 
 export default async function ContractEditPage({ params }) {
-  let contract, customers = []
+  let contract, customers = [], btwCodes = []
   try {
-    contract = await prisma.contract.findFirst({ where: { id: parseInt(params.id) } })
-    customers = await prisma.customer.findMany({ orderBy: { debiteurnummer: 'asc' } })
+    ;[contract, customers, btwCodes] = await Promise.all([
+      prisma.contract.findFirst({ where: { id: parseInt(params.id) } }),
+      prisma.customer.findMany({ orderBy: { debiteurnummer: 'asc' } }),
+      prisma.btwCode.findMany({ orderBy: { code: 'asc' } }),
+    ])
   } catch {}
 
   if (!contract) notFound()
@@ -27,5 +30,5 @@ export default async function ContractEditPage({ params }) {
     updatedAt: contract.updatedAt.toISOString(),
   }
 
-  return <ContractEditForm contract={serialized} customers={customers} />
+  return <ContractEditForm contract={serialized} customers={customers} btwCodes={btwCodes} />
 }

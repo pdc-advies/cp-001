@@ -12,6 +12,7 @@ export async function POST(request) {
     const customer = await prisma.customer.create({
       data: {
         debiteurnummer: body.debiteurnummer,
+        debiteurnummerOud: body.debiteurnummerOud ?? null,
         name: body.name,
         address: body.address ?? null,
         city: body.city ?? null,

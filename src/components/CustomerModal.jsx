@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 
 const EMPTY = {
-  debiteurnummer: '', name: '', address: '', city: '', email: '', phone: '', notes: ''
+  debiteurnummer: '', debiteurnummerOud: '', name: '', address: '', city: '', email: '', phone: '', notes: ''
 }
 
 const inputClass = 'w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
@@ -28,6 +28,7 @@ export default function CustomerModal({ customer, onClose, onSave }) {
   useEffect(() => {
     setForm(customer ? {
       debiteurnummer: customer.debiteurnummer || '',
+      debiteurnummerOud: customer.debiteurnummerOud || '',
       name: customer.name || '',
       address: customer.address || '',
       city: customer.city || '',
@@ -51,6 +52,7 @@ export default function CustomerModal({ customer, onClose, onSave }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
+          debiteurnummerOud: form.debiteurnummerOud || null,
           address: form.address || null,
           city: form.city || null,
           email: form.email || null,
@@ -87,9 +89,14 @@ export default function CustomerModal({ customer, onClose, onSave }) {
         )}
 
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Debiteurnummer" required>
+          <Field label="Debiteurnummer (nieuw)" required>
             <input type="text" required value={form.debiteurnummer} onChange={set('debiteurnummer')} placeholder="800310" className={inputClass} />
           </Field>
+          <Field label="Debiteurnummer (oud)">
+            <input type="text" value={form.debiteurnummerOud} onChange={set('debiteurnummerOud')} placeholder="oud nummer" className={inputClass} />
+          </Field>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
           <Field label="Naam" required>
             <input type="text" required value={form.name} onChange={set('name')} placeholder="Bedrijfsnaam" className={inputClass} />
           </Field>

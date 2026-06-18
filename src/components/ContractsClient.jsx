@@ -73,7 +73,10 @@ export default function ContractsClient({ initialContracts, initialCustomers = [
 
   const customerMap = useMemo(() => {
     const m = {}
-    for (const c of customers) m[c.debiteurnummer] = c
+    for (const c of customers) {
+      m[c.debiteurnummer] = c
+      if (c.debiteurnummerOud) m[c.debiteurnummerOud] = c
+    }
     return m
   }, [customers])
 
