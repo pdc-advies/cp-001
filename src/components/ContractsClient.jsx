@@ -56,7 +56,7 @@ export default function ContractsClient({ initialContracts }) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [typeFilter, setTypeFilter] = useState('all')
-  const [modal, setModal] = useState({ open: false, contract: null })
+  const [modal, setModal] = useState({ open: false, contract: null }) // new contract only
   const [deleting, setDeleting] = useState(null)
   const [importing, setImporting] = useState(false)
   const [importResult, setImportResult] = useState(null)
@@ -119,7 +119,6 @@ export default function ContractsClient({ initialContracts }) {
   }, [])
 
   const openNew = () => setModal({ open: true, contract: null })
-  const openEdit = (c) => setModal({ open: true, contract: c })
   const closeModal = () => setModal({ open: false, contract: null })
 
   const handleSave = async () => {
@@ -391,13 +390,13 @@ export default function ContractsClient({ initialContracts }) {
                         </td>
                         <td className="px-4 py-2.5">
                           <div className="flex items-center justify-end gap-0.5">
-                            <button
-                              onClick={() => openEdit(contract)}
+                            <a
+                              href={`/contracts/${contract.id}`}
                               className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                               title="Bewerken"
                             >
                               <Pencil className="w-4 h-4" />
-                            </button>
+                            </a>
                             <button
                               onClick={() => handleDelete(contract.id)}
                               disabled={deleting === contract.id}

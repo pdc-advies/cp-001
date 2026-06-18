@@ -1,4 +1,5 @@
 import './globals.css'
+import Nav from '@/components/Nav'
 
 export const metadata = {
   title: 'Contract Register',
@@ -19,6 +20,7 @@ export default function RootLayout({ children }) {
               </div>
               <span className="font-semibold text-gray-900">Contract Register</span>
             </div>
+            <Nav />
           </div>
         </header>
         <main className="max-w-7xl mx-auto px-6 py-8">
