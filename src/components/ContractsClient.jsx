@@ -317,102 +317,102 @@ export default function ContractsClient({ initialContracts }) {
                 <th className="px-4 py-3 w-20" />
               </tr>
             </thead>
-            <tbody>
-              {grouped.length === 0 ? (
+            {grouped.length === 0 ? (
+              <tbody>
                 <tr>
                   <td colSpan={10} className="px-4 py-12 text-center">
                     <FileText className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                     <p className="text-gray-400 text-sm">Geen contracten gevonden</p>
                   </td>
                 </tr>
-              ) : grouped.map(({ debiteur, contracts: groupContracts, totalM2, totalJaarprijs }) => {
-                const isCollapsed = collapsed.has(debiteur)
-                return (
-                  <tbody key={debiteur}>
-                    {/* Group header row */}
-                    <tr
-                      onClick={() => toggleGroup(debiteur)}
-                      className="cursor-pointer bg-blue-50/40 hover:bg-blue-50 border-t border-blue-100 select-none"
-                    >
-                      <td colSpan={8} className="px-4 py-2.5">
-                        <div className="flex items-center gap-2">
-                          {isCollapsed
-                            ? <ChevronRight className="w-4 h-4 text-blue-400 shrink-0" />
-                            : <ChevronDown className="w-4 h-4 text-blue-400 shrink-0" />
-                          }
-                          <span className="font-semibold text-gray-800">{debiteur}</span>
+              </tbody>
+            ) : grouped.map(({ debiteur, contracts: groupContracts, totalM2, totalJaarprijs }) => {
+              const isCollapsed = collapsed.has(debiteur)
+              return (
+                <tbody key={debiteur}>
+                  {/* Group header row */}
+                  <tr
+                    onClick={() => toggleGroup(debiteur)}
+                    className="cursor-pointer bg-blue-50/40 hover:bg-blue-50 border-t border-blue-100 select-none"
+                  >
+                    <td colSpan={8} className="px-4 py-2.5">
+                      <div className="flex items-center gap-2">
+                        {isCollapsed
+                          ? <ChevronRight className="w-4 h-4 text-blue-400 shrink-0" />
+                          : <ChevronDown className="w-4 h-4 text-blue-400 shrink-0" />
+                        }
+                        <span className="font-semibold text-gray-800">{debiteur}</span>
+                        <span className="text-gray-400 text-xs">
+                          {groupContracts.length} {groupContracts.length === 1 ? 'contract' : 'contracten'}
+                        </span>
+                        {totalM2 > 0 && (
                           <span className="text-gray-400 text-xs">
-                            {groupContracts.length} {groupContracts.length === 1 ? 'contract' : 'contracten'}
+                            · {new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 0 }).format(totalM2)} m²
                           </span>
-                          {totalM2 > 0 && (
-                            <span className="text-gray-400 text-xs">
-                              · {new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 0 }).format(totalM2)} m²
-                            </span>
-                          )}
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-2.5 text-right font-semibold text-gray-700 whitespace-nowrap">
+                      {totalJaarprijs > 0 ? formatCurrency(totalJaarprijs) : '—'}
+                    </td>
+                    <td />
+                  </tr>
+                  {/* Contract rows */}
+                  {!isCollapsed && groupContracts.map(contract => (
+                    <tr key={contract.id} className="hover:bg-gray-50 transition-colors border-t border-gray-100">
+                      <td className="pl-10 pr-4 py-2.5 font-medium text-gray-800 whitespace-nowrap">
+                        {contract.contractNumber}
+                      </td>
+                      <td className="px-4 py-2.5 text-gray-500 whitespace-nowrap text-xs">
+                        {contract.contractType || '—'}
+                      </td>
+                      <td className="px-4 py-2.5 text-gray-500 whitespace-nowrap text-xs">
+                        {contract.kadastrale || '—'}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <StatusBadge status={contract.status} />
+                      </td>
+                      <td className="px-4 py-2.5 text-gray-500 whitespace-nowrap">{formatDate(contract.startDate)}</td>
+                      <td className="px-4 py-2.5 text-gray-500 whitespace-nowrap">{formatDate(contract.endDate)}</td>
+                      <td className="px-4 py-2.5 text-right text-gray-600 whitespace-nowrap">
+                        {contract.m2 != null
+                          ? new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 0 }).format(contract.m2)
+                          : '—'}
+                      </td>
+                      <td className="px-4 py-2.5 text-right text-gray-600 whitespace-nowrap">
+                        {contract.pricePerM2 != null
+                          ? new Intl.NumberFormat('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(contract.pricePerM2)
+                          : '—'}
+                      </td>
+                      <td className="px-4 py-2.5 text-right text-gray-700 font-medium whitespace-nowrap">
+                        {contract.m2 != null && contract.pricePerM2 != null
+                          ? formatCurrency(contract.m2 * contract.pricePerM2)
+                          : formatCurrency(contract.contractValue)}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <div className="flex items-center justify-end gap-0.5">
+                          <a
+                            href={`/contracts/${contract.id}`}
+                            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                            title="Bewerken"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </a>
+                          <button
+                            onClick={() => handleDelete(contract.id)}
+                            disabled={deleting === contract.id}
+                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors disabled:opacity-40"
+                            title="Verwijderen"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
-                      <td className="px-4 py-2.5 text-right font-semibold text-gray-700 whitespace-nowrap">
-                        {totalJaarprijs > 0 ? formatCurrency(totalJaarprijs) : '—'}
-                      </td>
-                      <td />
                     </tr>
-                    {/* Contract rows */}
-                    {!isCollapsed && groupContracts.map(contract => (
-                      <tr key={contract.id} className="hover:bg-gray-50 transition-colors border-t border-gray-100">
-                        <td className="pl-10 pr-4 py-2.5 font-medium text-gray-800 whitespace-nowrap">
-                          {contract.contractNumber}
-                        </td>
-                        <td className="px-4 py-2.5 text-gray-500 whitespace-nowrap text-xs">
-                          {contract.contractType || '—'}
-                        </td>
-                        <td className="px-4 py-2.5 text-gray-500 whitespace-nowrap text-xs">
-                          {contract.kadastrale || '—'}
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <StatusBadge status={contract.status} />
-                        </td>
-                        <td className="px-4 py-2.5 text-gray-500 whitespace-nowrap">{formatDate(contract.startDate)}</td>
-                        <td className="px-4 py-2.5 text-gray-500 whitespace-nowrap">{formatDate(contract.endDate)}</td>
-                        <td className="px-4 py-2.5 text-right text-gray-600 whitespace-nowrap">
-                          {contract.m2 != null
-                            ? new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 0 }).format(contract.m2)
-                            : '—'}
-                        </td>
-                        <td className="px-4 py-2.5 text-right text-gray-600 whitespace-nowrap">
-                          {contract.pricePerM2 != null
-                            ? new Intl.NumberFormat('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(contract.pricePerM2)
-                            : '—'}
-                        </td>
-                        <td className="px-4 py-2.5 text-right text-gray-700 font-medium whitespace-nowrap">
-                          {contract.m2 != null && contract.pricePerM2 != null
-                            ? formatCurrency(contract.m2 * contract.pricePerM2)
-                            : formatCurrency(contract.contractValue)}
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <div className="flex items-center justify-end gap-0.5">
-                            <a
-                              href={`/contracts/${contract.id}`}
-                              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                              title="Bewerken"
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </a>
-                            <button
-                              onClick={() => handleDelete(contract.id)}
-                              disabled={deleting === contract.id}
-                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors disabled:opacity-40"
-                              title="Verwijderen"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                )
-              })}
-            </tbody>
+                  ))}
+                </tbody>
+              )
+            })}
           </table>
         </div>
       </div>
