@@ -7,13 +7,23 @@ const EMPTY_FORM = {
   contractNumber: '',
   customerName: '',
   kostenplaats: '',
+  contractType: '',
+  invoiceFrequency: '',
+  manager: '',
+  debiteurnummer: '',
+  kadastrale: '',
   description: '',
   startDate: '',
   endDate: '',
+  invoiceStartDate: '',
+  invoiceEndDate: '',
   contractValue: '',
   m2: '',
   pricePerM2: '',
   priceIndex: '',
+  basePricePerM2: '',
+  baseIndexYear: '',
+  indexSeries: '',
   status: 'draft',
   notes: ''
 }
@@ -53,6 +63,18 @@ export default function ContractModal({ contract, onClose, onSave }) {
         m2: contract.m2 ?? '',
         pricePerM2: contract.pricePerM2 ?? '',
         priceIndex: contract.priceIndex ?? '',
+        basePricePerM2: contract.basePricePerM2 ?? '',
+        baseIndexYear: contract.baseIndexYear ?? '',
+        indexSeries: contract.indexSeries ?? '',
+        contractType: contract.contractType ?? '',
+        invoiceFrequency: contract.invoiceFrequency ?? '',
+        manager: contract.manager ?? '',
+        debiteurnummer: contract.debiteurnummer ?? '',
+        kadastrale: contract.kadastrale ?? '',
+        invoiceStartDate: contract.invoiceStartDate
+          ? new Date(contract.invoiceStartDate).toISOString().split('T')[0] : '',
+        invoiceEndDate: contract.invoiceEndDate
+          ? new Date(contract.invoiceEndDate).toISOString().split('T')[0] : '',
         status: contract.status || 'draft',
         notes: contract.notes || ''
       })
@@ -75,8 +97,18 @@ export default function ContractModal({ contract, onClose, onSave }) {
         m2: form.m2 !== '' ? parseFloat(form.m2) : null,
         pricePerM2: form.pricePerM2 !== '' ? parseFloat(form.pricePerM2) : null,
         priceIndex: form.priceIndex !== '' ? parseFloat(form.priceIndex) : null,
+        basePricePerM2: form.basePricePerM2 !== '' ? parseFloat(form.basePricePerM2) : null,
+        baseIndexYear: form.baseIndexYear !== '' ? parseInt(form.baseIndexYear) : null,
         endDate: form.endDate || null,
+        invoiceStartDate: form.invoiceStartDate || null,
+        invoiceEndDate: form.invoiceEndDate || null,
         kostenplaats: form.kostenplaats || null,
+        contractType: form.contractType || null,
+        invoiceFrequency: form.invoiceFrequency || null,
+        manager: form.manager || null,
+        debiteurnummer: form.debiteurnummer || null,
+        kadastrale: form.kadastrale || null,
+        indexSeries: form.indexSeries || null,
         description: form.description || null,
         notes: form.notes || null
       }
@@ -143,15 +175,35 @@ export default function ContractModal({ contract, onClose, onSave }) {
           </Field>
         </div>
 
-        <Field label="Kostenplaats">
-          <input
-            type="text"
-            value={form.kostenplaats}
-            onChange={set('kostenplaats')}
-            placeholder="KP-100, KP-200"
-            className={inputClass}
-          />
-        </Field>
+        <div className="grid grid-cols-3 gap-4">
+          <Field label="Kostenplaats">
+            <input type="text" value={form.kostenplaats} onChange={set('kostenplaats')} placeholder="KP-100" className={inputClass} />
+          </Field>
+          <Field label="Type contract">
+            <input type="text" value={form.contractType} onChange={set('contractType')} placeholder="Erfpacht, Huur…" className={inputClass} />
+          </Field>
+          <Field label="Frequentie">
+            <select value={form.invoiceFrequency} onChange={set('invoiceFrequency')} className={inputClass}>
+              <option value="">—</option>
+              <option>Maand</option>
+              <option>Kwartaal</option>
+              <option>Jaar</option>
+              <option>Ad Hoc</option>
+            </select>
+          </Field>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          <Field label="Debiteurnummer">
+            <input type="text" value={form.debiteurnummer} onChange={set('debiteurnummer')} placeholder="800310" className={inputClass} />
+          </Field>
+          <Field label="Kadastrale notatie">
+            <input type="text" value={form.kadastrale} onChange={set('kadastrale')} placeholder="SvG M 1790" className={inputClass} />
+          </Field>
+          <Field label="Manager">
+            <input type="text" value={form.manager} onChange={set('manager')} placeholder="Naam manager" className={inputClass} />
+          </Field>
+        </div>
 
         <Field label="Omschrijving">
           <textarea
@@ -180,6 +232,15 @@ export default function ContractModal({ contract, onClose, onSave }) {
               onChange={set('endDate')}
               className={inputClass}
             />
+          </Field>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Afwijkende ingangsdatum factuur">
+            <input type="date" value={form.invoiceStartDate} onChange={set('invoiceStartDate')} className={inputClass} />
+          </Field>
+          <Field label="Afwijkende einddatum factuur">
+            <input type="date" value={form.invoiceEndDate} onChange={set('invoiceEndDate')} className={inputClass} />
           </Field>
         </div>
 
@@ -216,6 +277,18 @@ export default function ContractModal({ contract, onClose, onSave }) {
               placeholder="bv. 1.05"
               className={inputClass}
             />
+          </Field>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          <Field label="Basisprijs/m²">
+            <input type="number" step="0.01" min="0" value={form.basePricePerM2} onChange={set('basePricePerM2')} placeholder="0.00" className={inputClass} />
+          </Field>
+          <Field label="Basisjaar index">
+            <input type="number" step="1" min="1900" max="2100" value={form.baseIndexYear} onChange={set('baseIndexYear')} placeholder="2016" className={inputClass} />
+          </Field>
+          <Field label="Reeks (bijv. CPI)">
+            <input type="text" value={form.indexSeries} onChange={set('indexSeries')} placeholder="CPI" className={inputClass} />
           </Field>
         </div>
 

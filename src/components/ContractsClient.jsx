@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
-import { Search, Plus, Download, Pencil, Trash2, FileText } from 'lucide-react'
+import { useState, useMemo, useCallback, useRef } from 'react'
+import { Search, Plus, Download, Pencil, Trash2, FileText, Upload } from 'lucide-react'
 import ContractModal from './ContractModal'
 
 const STATUS_CONFIG = {
@@ -55,8 +55,17 @@ export default function ContractsClient({ initialContracts }) {
   const [contracts, setContracts] = useState(initialContracts)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [typeFilter, setTypeFilter] = useState('all')
   const [modal, setModal] = useState({ open: false, contract: null })
   const [deleting, setDeleting] = useState(null)
+  const [importing, setImporting] = useState(false)
+  const [importResult, setImportResult] = useState(null)
+  const fileInputRef = useRef(null)
+
+  const contractTypes = useMemo(() => {
+    const types = [...new Set(contracts.map(c => c.contractType).filter(Boolean))].sort()
+    return types
+  }, [contracts])
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
@@ -65,12 +74,15 @@ export default function ContractsClient({ initialContracts }) {
         c.contractNumber.toLowerCase().includes(q) ||
         c.customerName.toLowerCase().includes(q) ||
         (c.description || '').toLowerCase().includes(q) ||
-        (c.kostenplaats || '').toLowerCase().includes(q)
+        (c.kostenplaats || '').toLowerCase().includes(q) ||
+        (c.kadastrale || '').toLowerCase().includes(q) ||
+        (c.debiteurnummer || '').toLowerCase().includes(q)
       )) return false
       if (statusFilter !== 'all' && c.status !== statusFilter) return false
+      if (typeFilter !== 'all' && c.contractType !== typeFilter) return false
       return true
     })
-  }, [contracts, search, statusFilter])
+  }, [contracts, search, statusFilter, typeFilter])
 
   const refresh = useCallback(async () => {
     const res = await fetch('/api/contracts')
@@ -94,6 +106,27 @@ export default function ContractsClient({ initialContracts }) {
       await refresh()
     } finally {
       setDeleting(null)
+    }
+  }
+
+  const handleImport = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImporting(true)
+    setImportResult(null)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/contracts/import', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Import mislukt')
+      setImportResult(data)
+      await refresh()
+    } catch (err) {
+      setImportResult({ error: err.message })
+    } finally {
+      setImporting(false)
+      e.target.value = ''
     }
   }
 
@@ -150,14 +183,49 @@ export default function ContractsClient({ initialContracts }) {
           <option value="expired">Verlopen</option>
           <option value="draft">Concept</option>
         </select>
+        {contractTypes.length > 0 && (
+          <select
+            value={typeFilter}
+            onChange={e => setTypeFilter(e.target.value)}
+            className="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="all">Alle typen</option>
+            {contractTypes.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+        )}
         <a
           href="/api/contracts/export/excel"
           className="inline-flex items-center gap-2 px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
         >
           <Download className="w-4 h-4" />
-          Export Excel
+          Export
         </a>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".xlsx,.xls"
+          onChange={handleImport}
+          className="hidden"
+        />
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={importing}
+          className="inline-flex items-center gap-2 px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-60 transition-colors"
+        >
+          <Upload className="w-4 h-4" />
+          {importing ? 'Importeren...' : 'Import Excel'}
+        </button>
       </div>
+
+      {importResult && (
+        <div className={`mb-4 px-4 py-3 rounded-lg text-sm border ${importResult.error ? 'bg-red-50 border-red-200 text-red-700' : 'bg-green-50 border-green-200 text-green-700'}`}>
+          {importResult.error
+            ? `Import fout: ${importResult.error}`
+            : `Import klaar — ${importResult.created} aangemaakt, ${importResult.updated} bijgewerkt${importResult.failed ? `, ${importResult.failed} mislukt` : ''}`
+          }
+          <button onClick={() => setImportResult(null)} className="ml-3 underline opacity-70 hover:opacity-100">sluiten</button>
+        </div>
+      )}
 
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
@@ -165,22 +233,22 @@ export default function ContractsClient({ initialContracts }) {
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
                 <th className="text-left px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Contract Nr</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">Klant</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Kostenplaats</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Type</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Debiteur</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Kadastrale</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-500">Status</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Startdatum</th>
                 <th className="text-left px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Einddatum</th>
                 <th className="text-right px-4 py-3 font-medium text-gray-500 whitespace-nowrap">m²</th>
                 <th className="text-right px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Prijs/m²</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Basisprijs</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Waarde</th>
+                <th className="text-right px-4 py-3 font-medium text-gray-500 whitespace-nowrap">Jaarprijs</th>
                 <th className="px-4 py-3 w-20" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="px-4 py-16 text-center">
+                  <td colSpan={11} className="px-4 py-12 text-center">
                     <FileText className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                     <p className="text-gray-400 text-sm">Geen contracten gevonden</p>
                   </td>
@@ -191,26 +259,34 @@ export default function ContractsClient({ initialContracts }) {
                     <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
                       {contract.contractNumber}
                     </td>
-                    <td className="px-4 py-3 text-gray-700">{contract.customerName}</td>
-                    <td className="px-4 py-3 text-gray-500">{contract.kostenplaats || '—'}</td>
+                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap text-xs">
+                      {contract.contractType || '—'}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
+                      {contract.debiteurnummer || contract.customerName || '—'}
+                    </td>
+                    <td className="px-4 py-3 text-gray-500 whitespace-nowrap text-xs">
+                      {contract.kadastrale || '—'}
+                    </td>
                     <td className="px-4 py-3">
                       <StatusBadge status={contract.status} />
                     </td>
                     <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{formatDate(contract.startDate)}</td>
                     <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{formatDate(contract.endDate)}</td>
-                    <td className="px-4 py-3 text-right text-gray-500 whitespace-nowrap">
-                      {contract.m2 != null ? new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 1 }).format(contract.m2) : '—'}
-                    </td>
-                    <td className="px-4 py-3 text-right text-gray-500 whitespace-nowrap">
-                      {contract.pricePerM2 != null ? new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }).format(contract.pricePerM2) : '—'}
+                    <td className="px-4 py-3 text-right text-gray-600 whitespace-nowrap">
+                      {contract.m2 != null
+                        ? new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 0 }).format(contract.m2)
+                        : '—'}
                     </td>
                     <td className="px-4 py-3 text-right text-gray-600 whitespace-nowrap">
-                      {(contract.m2 != null && contract.pricePerM2 != null)
-                        ? formatCurrency(contract.m2 * contract.pricePerM2)
+                      {contract.pricePerM2 != null
+                        ? new Intl.NumberFormat('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(contract.pricePerM2)
                         : '—'}
                     </td>
                     <td className="px-4 py-3 text-right text-gray-700 font-medium whitespace-nowrap">
-                      {formatCurrency(contract.contractValue)}
+                      {contract.m2 != null && contract.pricePerM2 != null
+                        ? formatCurrency(contract.m2 * contract.pricePerM2)
+                        : formatCurrency(contract.contractValue)}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-0.5">

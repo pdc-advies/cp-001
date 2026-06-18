@@ -18,6 +18,16 @@ export async function PUT(request, { params }) {
         m2: body.m2 ?? null,
         pricePerM2: body.pricePerM2 ?? null,
         priceIndex: body.priceIndex ?? null,
+        basePricePerM2: body.basePricePerM2 ?? null,
+        baseIndexYear: body.baseIndexYear ?? null,
+        indexSeries: body.indexSeries ?? null,
+        contractType: body.contractType ?? null,
+        invoiceFrequency: body.invoiceFrequency ?? null,
+        manager: body.manager ?? null,
+        invoiceStartDate: body.invoiceStartDate ? new Date(body.invoiceStartDate) : null,
+        invoiceEndDate: body.invoiceEndDate ? new Date(body.invoiceEndDate) : null,
+        debiteurnummer: body.debiteurnummer ?? null,
+        kadastrale: body.kadastrale ?? null,
         status: body.status || 'draft',
         notes: body.notes ?? null
       }
