@@ -54,6 +54,9 @@ export default function ContractEditForm({ contract, customers }) {
     indexSeries: contract.indexSeries ?? '',
     priceIndex: contract.priceIndex ?? '',
     contractValue: contract.contractValue ?? '',
+    grootboek: contract.grootboek ?? '',
+    btwCode: contract.btwCode ?? '',
+    invoiceRef: contract.invoiceRef ?? '',
     notes: contract.notes ?? '',
   })
 
@@ -102,6 +105,9 @@ export default function ContractEditForm({ contract, customers }) {
         kadastrale: form.kadastrale || null,
         indexSeries: form.indexSeries || null,
         description: form.description || null,
+        grootboek: form.grootboek || null,
+        btwCode: form.btwCode || null,
+        invoiceRef: form.invoiceRef || null,
         notes: form.notes || null,
         customerName: matchedCustomer?.name ?? form.debiteurnummer ?? contract.customerName,
       }
@@ -240,6 +246,21 @@ export default function ContractEditForm({ contract, customers }) {
             </Field>
             <Field label="Afwijkende einddatum factuur">
               <input type="date" value={form.invoiceEndDate} onChange={set('invoiceEndDate')} className={inputClass} />
+            </Field>
+          </div>
+        </Section>
+
+        {/* Boekhoudkundige gegevens */}
+        <Section title="Boekhoudkundige gegevens">
+          <div className="grid grid-cols-3 gap-4">
+            <Field label="Grootboek (70GBK)">
+              <input type="text" value={form.grootboek} onChange={set('grootboek')} placeholder="82000" className={inputClass} />
+            </Field>
+            <Field label="BTW code (72BTW)">
+              <input type="text" value={form.btwCode} onChange={set('btwCode')} placeholder="0" className={inputClass} />
+            </Field>
+            <Field label="Referentie factuur (60REF)">
+              <input type="text" value={form.invoiceRef} onChange={set('invoiceRef')} placeholder="Erfpacht #Ke kwartaal #J" className={inputClass} />
             </Field>
           </div>
         </Section>
