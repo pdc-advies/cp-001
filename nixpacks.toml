@@ -8,4 +8,4 @@ cmds = ["npm ci"]
 cmds = ["npm run build"]
 
 [start]
-cmd = "node node_modules/.bin/next start -p $PORT"
+cmd = "node node_modules/.bin/prisma db push && node node_modules/.bin/next start -p $PORT"
