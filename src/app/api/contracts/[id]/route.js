@@ -34,9 +34,6 @@ export async function PUT(request, { params }) {
     })
     return NextResponse.json(contract)
   } catch (err) {
-    if (err.code === 'P2002') {
-      return NextResponse.json({ error: 'Contractnummer bestaat al' }, { status: 409 })
-    }
     if (err.code === 'P2025') {
       return NextResponse.json({ error: 'Contract niet gevonden' }, { status: 404 })
     }

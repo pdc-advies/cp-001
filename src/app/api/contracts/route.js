@@ -39,9 +39,15 @@ export async function POST(request) {
     })
     return NextResponse.json(contract, { status: 201 })
   } catch (err) {
-    if (err.code === 'P2002') {
-      return NextResponse.json({ error: 'Contractnummer bestaat al' }, { status: 409 })
-    }
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
+}
+
+export async function DELETE() {
+  try {
+    const { count } = await prisma.contract.deleteMany()
+    return NextResponse.json({ deleted: count })
+  } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }

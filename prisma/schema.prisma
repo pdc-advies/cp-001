@@ -9,7 +9,7 @@ datasource db {
 
 model Contract {
   id             Int       @id @default(autoincrement())
-  contractNumber String    @unique @map("contract_number")
+  contractNumber String    @map("contract_number")
   customerName   String    @map("customer_name")
   kostenplaats   String?
   description    String?

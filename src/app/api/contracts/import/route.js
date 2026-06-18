@@ -55,9 +55,7 @@ export async function POST(request) {
       return col ? row.getCell(col).value : null
     }
 
-    let created = 0, updated = 0, failed = 0
-    const failedCodes = []
-
+    const rows = []
     for (let i = 4; i <= sheet.rowCount; i++) {
       const row = sheet.getRow(i)
       const entityCode = toStr(get(row, 'entity code'))
@@ -82,7 +80,7 @@ export async function POST(request) {
       const bixRaw = get(row, '82BIX')
       const baseIndexYear = bixRaw ? (parseInt(String(bixRaw)) || null) : null
 
-      const data = {
+      rows.push({
         contractNumber: entityCode,
         customerName: debiteurnummer ?? entityCode,
         kostenplaats: toStr(get(row, '71KPL')),
@@ -104,25 +102,11 @@ export async function POST(request) {
         kadastrale: toStr(get(row, '51KAD')),
         status: mapStatus(get(row, '11STAT')),
         notes: notes || null,
-      }
-
-      try {
-        const existing = await prisma.contract.findUnique({ where: { contractNumber: entityCode } })
-        if (existing) {
-          await prisma.contract.update({ where: { contractNumber: entityCode }, data })
-          updated++
-        } else {
-          await prisma.contract.create({ data })
-          created++
-        }
-      } catch (e) {
-        failed++
-        failedCodes.push(entityCode)
-        console.error('Import row error', entityCode, e.message)
-      }
+      })
     }
 
-    return NextResponse.json({ created, updated, failed, failedCodes: failedCodes.slice(0, 10) })
+    const result = await prisma.contract.createMany({ data: rows, skipDuplicates: false })
+    return NextResponse.json({ created: result.count, failed: rows.length - result.count })
   } catch (err) {
     console.error('Import error', err)
     return NextResponse.json({ error: err.message }, { status: 500 })

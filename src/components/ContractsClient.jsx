@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback, useRef } from 'react'
-import { Search, Plus, Download, Pencil, Trash2, FileText, Upload } from 'lucide-react'
+import { Search, Plus, Download, Pencil, Trash2, FileText, Upload, AlertTriangle } from 'lucide-react'
 import ContractModal from './ContractModal'
 
 const STATUS_CONFIG = {
@@ -60,6 +60,8 @@ export default function ContractsClient({ initialContracts }) {
   const [deleting, setDeleting] = useState(null)
   const [importing, setImporting] = useState(false)
   const [importResult, setImportResult] = useState(null)
+  const [deleteConfirm, setDeleteConfirm] = useState(false)
+  const [deleting_all, setDeletingAll] = useState(false)
   const fileInputRef = useRef(null)
 
   const contractTypes = useMemo(() => {
@@ -106,6 +108,17 @@ export default function ContractsClient({ initialContracts }) {
       await refresh()
     } finally {
       setDeleting(null)
+    }
+  }
+
+  const handleDeleteAll = async () => {
+    setDeletingAll(true)
+    try {
+      await fetch('/api/contracts', { method: 'DELETE' })
+      setContracts([])
+    } finally {
+      setDeletingAll(false)
+      setDeleteConfirm(false)
     }
   }
 
@@ -215,6 +228,30 @@ export default function ContractsClient({ initialContracts }) {
           <Upload className="w-4 h-4" />
           {importing ? 'Importeren...' : 'Import Excel'}
         </button>
+        {!deleteConfirm ? (
+          <button
+            onClick={() => setDeleteConfirm(true)}
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+            Verwijder alles
+          </button>
+        ) : (
+          <div className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-red-50 border border-red-300 rounded-lg">
+            <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+            <span className="text-red-700 font-medium">Weet je het zeker?</span>
+            <button
+              onClick={handleDeleteAll}
+              disabled={deleting_all}
+              className="px-2 py-0.5 bg-red-600 text-white text-xs rounded hover:bg-red-700 disabled:opacity-60"
+            >
+              {deleting_all ? 'Bezig...' : 'Ja, verwijder alles'}
+            </button>
+            <button onClick={() => setDeleteConfirm(false)} className="text-gray-500 hover:text-gray-700 text-xs underline">
+              Annuleren
+            </button>
+          </div>
+        )}
       </div>
 
       {importResult && (
