@@ -17,6 +17,7 @@ const EMPTY_FORM = {
   endDate: '',
   invoiceStartDate: '',
   invoiceEndDate: '',
+  fixedPrice: false,
   contractValue: '',
   m2: '',
   pricePerM2: '',
@@ -63,6 +64,7 @@ export default function ContractModal({ contract, onClose, onSave }) {
         endDate: contract.endDate
           ? new Date(contract.endDate).toISOString().split('T')[0]
           : '',
+        fixedPrice: contract.fixedPrice ?? false,
         contractValue: contract.contractValue ?? '',
         m2: contract.m2 ?? '',
         pricePerM2: contract.pricePerM2 ?? '',
@@ -93,6 +95,7 @@ export default function ContractModal({ contract, onClose, onSave }) {
   }, [contract])
 
   const set = field => e => setForm(f => ({ ...f, [field]: e.target.value }))
+  const setCheck = field => e => setForm(f => ({ ...f, [field]: e.target.checked }))
 
   const handleSubmit = async e => {
     e.preventDefault()
@@ -101,9 +104,10 @@ export default function ContractModal({ contract, onClose, onSave }) {
     try {
       const body = {
         ...form,
+        fixedPrice: form.fixedPrice,
         contractValue: form.contractValue !== '' ? parseFloat(form.contractValue) : null,
         m2: form.m2 !== '' ? parseFloat(form.m2) : null,
-        pricePerM2: form.pricePerM2 !== '' ? parseFloat(form.pricePerM2) : null,
+        pricePerM2: !form.fixedPrice && form.pricePerM2 !== '' ? parseFloat(form.pricePerM2) : null,
         priceIndex: form.priceIndex !== '' ? parseFloat(form.priceIndex) : null,
         basePricePerM2: form.basePricePerM2 !== '' ? parseFloat(form.basePricePerM2) : null,
         baseIndexYear: form.baseIndexYear !== '' ? parseInt(form.baseIndexYear) : null,
@@ -256,82 +260,75 @@ export default function ContractModal({ contract, onClose, onSave }) {
           </Field>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
-          <Field label="Oppervlakte (m²)">
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={form.m2}
-              onChange={set('m2')}
-              placeholder="0"
-              className={inputClass}
-            />
-          </Field>
-          <Field label="Prijs per m² (€)">
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={form.pricePerM2}
-              onChange={set('pricePerM2')}
-              placeholder="0"
-              className={inputClass}
-            />
-          </Field>
-          <Field label="Index">
-            <input
-              type="number"
-              step="0.0001"
-              min="0"
-              value={form.priceIndex}
-              onChange={set('priceIndex')}
-              placeholder="bv. 1.05"
-              className={inputClass}
-            />
-          </Field>
+        <div className="flex items-center gap-2 py-1">
+          <input
+            id="modal-fixedPrice"
+            type="checkbox"
+            checked={form.fixedPrice}
+            onChange={setCheck('fixedPrice')}
+            className="w-4 h-4 accent-blue-600"
+          />
+          <label htmlFor="modal-fixedPrice" className="text-sm text-gray-700 select-none cursor-pointer">
+            Vaste prijs (74Q) — prijs is totale jaarprijs, geen m² berekening
+          </label>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
-          <Field label="Basisprijs/m²">
-            <input type="number" step="0.01" min="0" value={form.basePricePerM2} onChange={set('basePricePerM2')} placeholder="0.00" className={inputClass} />
-          </Field>
-          <Field label="Basisjaar index">
-            <input type="number" step="1" min="1900" max="2100" value={form.baseIndexYear} onChange={set('baseIndexYear')} placeholder="2016" className={inputClass} />
-          </Field>
-          <Field label="Reeks (bijv. CPI)">
-            <input type="text" value={form.indexSeries} onChange={set('indexSeries')} placeholder="CPI" className={inputClass} />
-          </Field>
-        </div>
-
-        {(form.m2 !== '' && form.pricePerM2 !== '') && (() => {
-          const m2 = parseFloat(form.m2) || 0
-          const ppm2 = parseFloat(form.pricePerM2) || 0
-          const idx = parseFloat(form.priceIndex) || null
-          const base = m2 * ppm2
-          const indexed = idx ? base * idx : null
-          return (
-            <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 text-sm space-y-1">
-              <div className="flex justify-between">
-                <span className="text-blue-700">Basisprijs (m² × prijs/m²)</span>
-                <span className="font-semibold text-blue-900">
-                  {new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }).format(base)}
-                </span>
-              </div>
-              {indexed != null && (
-                <div className="flex justify-between">
-                  <span className="text-blue-700">Geïndexeerde prijs (× {form.priceIndex})</span>
-                  <span className="font-semibold text-blue-900">
-                    {new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }).format(indexed)}
-                  </span>
-                </div>
-              )}
+        {!form.fixedPrice && (
+          <>
+            <div className="grid grid-cols-3 gap-4">
+              <Field label="Oppervlakte (m²)">
+                <input type="number" step="0.01" min="0" value={form.m2} onChange={set('m2')} placeholder="0" className={inputClass} />
+              </Field>
+              <Field label="Prijs per m² (€)">
+                <input type="number" step="0.01" min="0" value={form.pricePerM2} onChange={set('pricePerM2')} placeholder="0" className={inputClass} />
+              </Field>
+              <Field label="Index">
+                <input type="number" step="0.0001" min="0" value={form.priceIndex} onChange={set('priceIndex')} placeholder="bv. 1.05" className={inputClass} />
+              </Field>
             </div>
-          )
-        })()}
+
+            <div className="grid grid-cols-3 gap-4">
+              <Field label="Basisprijs/m²">
+                <input type="number" step="0.01" min="0" value={form.basePricePerM2} onChange={set('basePricePerM2')} placeholder="0.00" className={inputClass} />
+              </Field>
+              <Field label="Basisjaar index">
+                <input type="number" step="1" min="1900" max="2100" value={form.baseIndexYear} onChange={set('baseIndexYear')} placeholder="2016" className={inputClass} />
+              </Field>
+              <Field label="Reeks (bijv. CPI)">
+                <input type="text" value={form.indexSeries} onChange={set('indexSeries')} placeholder="CPI" className={inputClass} />
+              </Field>
+            </div>
+
+            {(form.m2 !== '' && form.pricePerM2 !== '') && (() => {
+              const m2 = parseFloat(form.m2) || 0
+              const ppm2 = parseFloat(form.pricePerM2) || 0
+              const idx = parseFloat(form.priceIndex) || null
+              const base = m2 * ppm2
+              const indexed = idx ? base * idx : null
+              return (
+                <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 text-sm space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-blue-700">Basisprijs (m² × prijs/m²)</span>
+                    <span className="font-semibold text-blue-900">
+                      {new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }).format(base)}
+                    </span>
+                  </div>
+                  {indexed != null && (
+                    <div className="flex justify-between">
+                      <span className="text-blue-700">Geïndexeerde prijs (× {form.priceIndex})</span>
+                      <span className="font-semibold text-blue-900">
+                        {new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }).format(indexed)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
+          </>
+        )}
 
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Waarde (€)">
+          <Field label={form.fixedPrice ? 'Jaarprijs (€)' : 'Waarde (€)'}>
             <input
               type="number"
               step="0.01"

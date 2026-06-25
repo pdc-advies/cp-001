@@ -33,6 +33,7 @@ model Contract {
   grootboekOud     String?   @map("grootboek_oud")
   btwCode          String?   @map("btw_code")
   invoiceRef       String?   @map("invoice_ref")
+  fixedPrice       Boolean   @default(false) @map("fixed_price")
   status           String    @default("draft")
   notes          String?
   createdAt      DateTime  @default(now()) @map("created_at")

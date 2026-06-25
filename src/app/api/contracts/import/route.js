@@ -65,8 +65,11 @@ export async function POST(request) {
       if (!startDate) continue
 
       const m2 = parseNum(get(row, '73OPP'))
-      const pricePerM2 = parseNum(get(row, '77PRIJS'))
-      const contractValue = m2 != null && pricePerM2 != null ? m2 * pricePerM2 : null
+      const fixedPrice = parseNum(get(row, '74Q')) === 1
+      const pricePerM2 = fixedPrice ? null : parseNum(get(row, '77PRIJS'))
+      const contractValue = fixedPrice
+        ? parseNum(get(row, '77PRIJS'))
+        : (m2 != null && pricePerM2 != null ? m2 * pricePerM2 : null)
 
       const oms = [get(row, '61OMS'), get(row, '62OMS2'), get(row, '63OMS3')]
         .map(toStr).filter(Boolean).join(' | ')
@@ -90,6 +93,7 @@ export async function POST(request) {
         contractValue,
         m2,
         pricePerM2,
+        fixedPrice,
         basePricePerM2: parseNum(get(row, '81BP')),
         baseIndexYear,
         indexSeries: toStr(get(row, '80RKS')),

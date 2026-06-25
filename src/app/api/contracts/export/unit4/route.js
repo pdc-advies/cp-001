@@ -74,7 +74,7 @@ export async function GET() {
 
   for (const c of contracts) {
     const customer = customerMap[c.debiteurnummer]
-    const jaarprijs = c.m2 && c.pricePerM2 ? c.m2 * c.pricePerM2 : c.contractValue
+    const jaarprijs = c.fixedPrice ? c.contractValue : (c.m2 && c.pricePerM2 ? c.m2 * c.pricePerM2 : c.contractValue)
     const periode = periodAmount(jaarprijs, c.invoiceFrequency)
 
     const row = sheet.addRow({
@@ -154,7 +154,7 @@ export async function GET() {
     const customer = customerMap[deb]
     const totalM2 = items.reduce((s, c) => s + (c.m2 || 0), 0)
     const totalJaar = items.reduce((s, c) => {
-      const j = c.m2 && c.pricePerM2 ? c.m2 * c.pricePerM2 : (c.contractValue || 0)
+      const j = c.fixedPrice ? (c.contractValue || 0) : (c.m2 && c.pricePerM2 ? c.m2 * c.pricePerM2 : (c.contractValue || 0))
       return s + j
     }, 0)
     const activeCount = items.filter(c => c.status === 'active').length
@@ -186,7 +186,7 @@ export async function GET() {
     count: contracts.length,
     actief: contracts.filter(c => c.status === 'active').length,
     m2: contracts.reduce((s, c) => s + (c.m2 || 0), 0),
-    jaar: eur(contracts.reduce((s, c) => s + (c.m2 && c.pricePerM2 ? c.m2 * c.pricePerM2 : (c.contractValue || 0)), 0)),
+    jaar: eur(contracts.reduce((s, c) => s + (c.fixedPrice ? (c.contractValue || 0) : (c.m2 && c.pricePerM2 ? c.m2 * c.pricePerM2 : (c.contractValue || 0))), 0)),
     per: null,
     freq: '',
   })

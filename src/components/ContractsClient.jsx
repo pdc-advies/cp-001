@@ -111,7 +111,7 @@ export default function ContractsClient({ initialContracts, initialCustomers = [
         contracts: [...items].sort((a, b) => a.contractNumber.localeCompare(b.contractNumber, 'nl')),
         totalM2: items.reduce((s, c) => s + (c.m2 || 0), 0),
         totalJaarprijs: items.reduce((s, c) =>
-          s + (c.m2 != null && c.pricePerM2 != null ? c.m2 * c.pricePerM2 : c.contractValue || 0), 0)
+          s + (c.fixedPrice ? (c.contractValue || 0) : (c.m2 != null && c.pricePerM2 != null ? c.m2 * c.pricePerM2 : c.contractValue || 0)), 0)
       }))
   }, [filtered])
 

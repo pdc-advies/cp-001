@@ -31,6 +31,7 @@ export async function PUT(request, { params }) {
         grootboekNieuw: body.grootboekNieuw ?? null,
         btwCode: body.btwCode ?? null,
         invoiceRef: body.invoiceRef ?? null,
+        fixedPrice: body.fixedPrice ?? false,
         status: body.status || 'draft',
         notes: body.notes ?? null
       }

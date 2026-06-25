@@ -47,6 +47,7 @@ export default function ContractEditForm({ contract, customers, btwCodes = [] })
     endDate: contract.endDate ?? '',
     invoiceStartDate: contract.invoiceStartDate ?? '',
     invoiceEndDate: contract.invoiceEndDate ?? '',
+    fixedPrice: contract.fixedPrice ?? false,
     m2: contract.m2 ?? '',
     pricePerM2: contract.pricePerM2 ?? '',
     basePricePerM2: contract.basePricePerM2 ?? '',
@@ -65,6 +66,7 @@ export default function ContractEditForm({ contract, customers, btwCodes = [] })
   const [error, setError] = useState(null)
 
   const set = f => e => setForm(p => ({ ...p, [f]: e.target.value }))
+  const setCheck = f => e => setForm(p => ({ ...p, [f]: e.target.checked }))
 
   // Customer lookup
   const customerMap = useMemo(() => {
@@ -92,9 +94,10 @@ export default function ContractEditForm({ contract, customers, btwCodes = [] })
     try {
       const body = {
         ...form,
+        fixedPrice: form.fixedPrice,
         contractValue: form.contractValue !== '' ? parseFloat(form.contractValue) : null,
         m2: form.m2 !== '' ? parseFloat(form.m2) : null,
-        pricePerM2: form.pricePerM2 !== '' ? parseFloat(form.pricePerM2) : null,
+        pricePerM2: !form.fixedPrice && form.pricePerM2 !== '' ? parseFloat(form.pricePerM2) : null,
         priceIndex: form.priceIndex !== '' ? parseFloat(form.priceIndex) : null,
         basePricePerM2: form.basePricePerM2 !== '' ? parseFloat(form.basePricePerM2) : null,
         baseIndexYear: form.baseIndexYear !== '' ? parseInt(form.baseIndexYear) : null,
@@ -289,28 +292,43 @@ export default function ContractEditForm({ contract, customers, btwCodes = [] })
 
         {/* Financieel */}
         <Section title="Financieel">
-          <div className="grid grid-cols-3 gap-4">
-            <Field label="Oppervlakte (m²)">
-              <input type="number" step="0.01" min="0" value={form.m2} onChange={set('m2')} className={inputClass} />
-            </Field>
-            <Field label="Jaarprijs per m² (€)">
-              <input type="number" step="0.0001" min="0" value={form.pricePerM2} onChange={set('pricePerM2')} className={inputClass} />
-            </Field>
-            <Field label="Index factor">
-              <input type="number" step="0.0001" min="0" value={form.priceIndex} onChange={set('priceIndex')} placeholder="bv. 1.05" className={inputClass} />
-            </Field>
-            <Field label="Basisprijs/m² (€)">
-              <input type="number" step="0.0001" min="0" value={form.basePricePerM2} onChange={set('basePricePerM2')} className={inputClass} />
-            </Field>
-            <Field label="Basisjaar index">
-              <input type="number" step="1" min="1900" max="2100" value={form.baseIndexYear} onChange={set('baseIndexYear')} placeholder="2016" className={inputClass} />
-            </Field>
-            <Field label="Reeks (bijv. CPI)">
-              <input type="text" value={form.indexSeries} onChange={set('indexSeries')} placeholder="CPI" className={inputClass} />
-            </Field>
+          <div className="flex items-center gap-2 pb-1">
+            <input
+              id="fixedPrice"
+              type="checkbox"
+              checked={form.fixedPrice}
+              onChange={setCheck('fixedPrice')}
+              className="w-4 h-4 accent-blue-600"
+            />
+            <label htmlFor="fixedPrice" className="text-sm text-gray-700 select-none cursor-pointer">
+              Vaste prijs (74Q) — prijs in 77PRIJS is totale jaarprijs, geen m² berekening
+            </label>
           </div>
 
-          {basePrice != null && (
+          {!form.fixedPrice && (
+            <div className="grid grid-cols-3 gap-4">
+              <Field label="Oppervlakte (m²)">
+                <input type="number" step="0.01" min="0" value={form.m2} onChange={set('m2')} className={inputClass} />
+              </Field>
+              <Field label="Jaarprijs per m² (€)">
+                <input type="number" step="0.0001" min="0" value={form.pricePerM2} onChange={set('pricePerM2')} className={inputClass} />
+              </Field>
+              <Field label="Index factor">
+                <input type="number" step="0.0001" min="0" value={form.priceIndex} onChange={set('priceIndex')} placeholder="bv. 1.05" className={inputClass} />
+              </Field>
+              <Field label="Basisprijs/m² (€)">
+                <input type="number" step="0.0001" min="0" value={form.basePricePerM2} onChange={set('basePricePerM2')} className={inputClass} />
+              </Field>
+              <Field label="Basisjaar index">
+                <input type="number" step="1" min="1900" max="2100" value={form.baseIndexYear} onChange={set('baseIndexYear')} placeholder="2016" className={inputClass} />
+              </Field>
+              <Field label="Reeks (bijv. CPI)">
+                <input type="text" value={form.indexSeries} onChange={set('indexSeries')} placeholder="CPI" className={inputClass} />
+              </Field>
+            </div>
+          )}
+
+          {!form.fixedPrice && basePrice != null && (
             <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 text-sm space-y-1">
               <div className="flex justify-between">
                 <span className="text-blue-700">Basisprijs (m² × prijs/m²)</span>
@@ -325,7 +343,7 @@ export default function ContractEditForm({ contract, customers, btwCodes = [] })
             </div>
           )}
 
-          <Field label="Contractwaarde (€) — handmatig overschrijven">
+          <Field label={form.fixedPrice ? 'Jaarprijs (€)' : 'Contractwaarde (€) — handmatig overschrijven'}>
             <input type="number" step="0.01" min="0" value={form.contractValue} onChange={set('contractValue')} className={`${inputClass} max-w-xs`} />
           </Field>
         </Section>
