@@ -5,10 +5,12 @@ import Map from '@arcgis/core/Map.js'
 import MapView from '@arcgis/core/views/MapView.js'
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer.js'
 import WMSLayer from '@arcgis/core/layers/WMSLayer.js'
+import MapImageLayer from '@arcgis/core/layers/MapImageLayer.js'
 import '@arcgis/core/assets/esri/themes/light/main.css'
 import { STATUS_CONFIG, contractFields, contractLabels, contractPopup, statusRenderer, toGraphics } from '@/lib/esriContracts'
 
 const CADASTRAL_WMS = 'https://service.pdok.nl/kadaster/kadastralekaart/wms/v5_0'
+const BE_CADASTRE = 'https://ccff02.minfin.fgov.be/geoservices/arcgis/rest/services/WMS/Cadastral_Layers/MapServer'
 
 // ArcGIS-kaart met de contracten als FeatureLayer. Alleen client-side laden (next/dynamic, ssr: false).
 export default function ArcgisContractMap({ features, visibleIds, selectedId, onSelect }) {
@@ -25,19 +27,27 @@ export default function ArcgisContractMap({ features, visibleIds, selectedId, on
   }, [onSelect])
 
   useEffect(() => {
-    const cadastre = new WMSLayer({
+    const cadastreNL = new WMSLayer({
       url: CADASTRAL_WMS,
       sublayers: [{ name: 'Kadastralekaart' }],
-      title: 'Kadastrale kaart (PDOK)',
+      title: 'Kadastrale kaart NL (PDOK)',
       opacity: 0.7,
     })
-    cadastreRef.current = cadastre
+    // Federale kadasterdienst België: perceelgrenzen (11) en gebouwen (12), alleen bij inzoomen
+    const cadastreBE = new MapImageLayer({
+      url: BE_CADASTRE,
+      title: 'Kadastrale percelen BE (FOD Financiën)',
+      sublayers: [{ id: 12, visible: true }, { id: 11, visible: true }],
+      minScale: 6000,
+      opacity: 0.7,
+    })
+    cadastreRef.current = [cadastreNL, cadastreBE]
 
     const view = new MapView({
       container: containerRef.current,
-      map: new Map({ basemap: 'osm', layers: [cadastre] }),
-      center: [3.72, 51.42], // Kanaalzone Zeeland
-      zoom: 11,
+      map: new Map({ basemap: 'osm', layers: [cadastreNL, cadastreBE] }),
+      center: [3.8, 51.28], // Kanaalzone Vlissingen–Terneuzen–Gent
+      zoom: 10,
     })
     viewRef.current = view
 
@@ -109,7 +119,7 @@ export default function ArcgisContractMap({ features, visibleIds, selectedId, on
   }, [layerView, selectedId])
 
   useEffect(() => {
-    if (cadastreRef.current) cadastreRef.current.visible = showCadastre
+    for (const layer of cadastreRef.current ?? []) layer.visible = showCadastre
   }, [showCadastre])
 
   return (

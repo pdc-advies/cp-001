@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { parseKadastrale } from '@/lib/kadastrale'
 import { parcelKey, resolveParcels } from '@/lib/pdok'
+import { resolveCapakeys } from '@/lib/cadgis'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,7 +16,8 @@ function annualPrice(c) {
 const day = (d) => (d instanceof Date ? d.toISOString().slice(0, 10) : null)
 
 // Contracten met hun percelen als GeoJSON (RFC 7946, WGS84).
-// match: 'volledig' | 'deels' | 'geen' (wel herkend, niets in BRK) | 'onleesbaar' (aanduiding niet te parsen)
+// match: 'volledig' | 'deels' | 'geen' (wel herkend, niets in het kadaster) | 'onleesbaar' (aanduiding niet te parsen)
+// NL-percelen via PDOK (BRK), BE-percelen (CaPaKey) via de federale kadasterdienst.
 export async function GET() {
   try {
     const [contracts, customers] = await Promise.all([
@@ -29,10 +31,15 @@ export async function GET() {
       if (k.debiteurnummerOud) customerByDebiteur[k.debiteurnummerOud] = k
     }
     const parsed = contracts.map((c) => ({ contract: c, parcels: parseKadastrale(c.kadastrale) }))
-    const resolved = await resolveParcels(parsed.flatMap((p) => p.parcels))
+    const all = parsed.flatMap((p) => p.parcels)
+    const [nl, be] = await Promise.all([
+      resolveParcels(all.filter((p) => p.land === 'NL')),
+      resolveCapakeys(all.filter((p) => p.land === 'BE').map((p) => p.capakey)),
+    ])
+    const lookup = (p) => (p.land === 'BE' ? be.get(p.capakey) : nl.get(parcelKey(p)))
 
     const features = parsed.map(({ contract: c, parcels }) => {
-      const found = parcels.map((p) => ({ ...p, hit: resolved.get(parcelKey(p)) }))
+      const found = parcels.map((p) => ({ ...p, hit: lookup(p) }))
       const hits = found.filter((p) => p.hit)
       const polygons = hits.flatMap((p) =>
         p.hit.geometry.type === 'MultiPolygon' ? p.hit.geometry.coordinates : [p.hit.geometry.coordinates]
@@ -60,8 +67,10 @@ export async function GET() {
           kostenplaats: c.kostenplaats,
           match,
           heeftGedeeltelijk: parcels.some((p) => p.partial),
+          land: [...new Set(parcels.map((p) => p.land))].sort().join('+') || null,
           percelen: found.map((p) => ({
-            label: `${p.gemeente} ${p.sectie} ${p.perceelnummer}${p.partial ? ' (ged.)' : ''}`,
+            label: p.land === 'BE' ? p.capakey : `${p.gemeente} ${p.sectie} ${p.perceelnummer}${p.partial ? ' (ged.)' : ''}`,
+            land: p.land,
             brk: p.hit?.aanduiding ?? null,
             grootte: p.hit?.grootte ?? null,
             gevonden: Boolean(p.hit),

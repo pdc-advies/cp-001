@@ -14,7 +14,7 @@ const ArcgisContractMap = dynamic(() => import('./ArcgisContractMap'), {
 const MATCH_CONFIG = {
   volledig: { label: 'Gevonden', icon: MapPin, className: 'text-blue-500' },
   deels: { label: 'Deels gevonden', icon: MapPin, className: 'text-amber-500' },
-  geen: { label: 'Niet in BRK', icon: CircleAlert, className: 'text-red-500' },
+  geen: { label: 'Niet in kadaster', icon: CircleAlert, className: 'text-red-500' },
   onleesbaar: { label: 'Onleesbaar', icon: CircleDashed, className: 'text-gray-400' },
 }
 
@@ -69,7 +69,7 @@ function Detail({ p, onClose }) {
               {perceel.gevonden ? <MapPin className="w-3 h-3 text-blue-500" /> : <CircleAlert className="w-3 h-3 text-red-500" />}
               <span className="text-gray-700">{perceel.label}</span>
               <span className="text-gray-400">
-                {perceel.gevonden ? `${perceel.brk} · ${fmtNum(perceel.grootte)} m²` : 'niet (meer) in BRK'}
+                {perceel.gevonden ? `${perceel.land === 'BE' ? 'kadaster BE' : perceel.brk} · ${fmtNum(perceel.grootte)} m²` : 'niet (meer) in kadaster'}
               </span>
             </li>
           ))}
@@ -88,6 +88,7 @@ export default function ContractMapClient() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [matchFilter, setMatchFilter] = useState('all')
+  const [landFilter, setLandFilter] = useState('all')
   const [selectedId, setSelectedId] = useState(null)
 
   useEffect(() => {
@@ -106,6 +107,7 @@ export default function ContractMapClient() {
     const q = search.toLowerCase()
     return features.filter(({ properties: p }) => {
       if (statusFilter !== 'all' && p.status !== statusFilter) return false
+      if (landFilter !== 'all' && !(p.land || '').includes(landFilter)) return false
       if (matchFilter === 'kaart' && !['volledig', 'deels'].includes(p.match)) return false
       if (matchFilter === 'niet' && ['volledig', 'deels'].includes(p.match)) return false
       if (!q) return true
@@ -113,7 +115,7 @@ export default function ContractMapClient() {
         (v || '').toLowerCase().includes(q)
       )
     })
-  }, [features, search, statusFilter, matchFilter])
+  }, [features, search, statusFilter, matchFilter, landFilter])
 
   const visibleIds = useMemo(() => new Set(filtered.map((f) => f.properties.id)), [filtered])
   const activeSelectedId = visibleIds.has(selectedId) ? selectedId : null
@@ -152,7 +154,7 @@ export default function ContractMapClient() {
           {data && (
             <p className="text-xs text-gray-500">
               {counts.volledig + counts.deels} van {features.length} contracten op de kaart
-              {' · '}{counts.deels} deels · {counts.geen} niet in BRK · {counts.onleesbaar} onleesbaar
+              {' · '}{counts.deels} deels · {counts.geen} niet in kadaster · {counts.onleesbaar} onleesbaar
             </p>
           )}
           <div className="relative">
@@ -171,6 +173,11 @@ export default function ContractMapClient() {
               <option value="active">Actief</option>
               <option value="expired">Verlopen</option>
               <option value="draft">Concept</option>
+            </select>
+            <select value={landFilter} onChange={(e) => setLandFilter(e.target.value)} className="px-2 py-1.5 text-sm border border-gray-300 rounded-lg bg-white text-gray-700">
+              <option value="all">NL + BE</option>
+              <option value="NL">Nederland</option>
+              <option value="BE">België</option>
             </select>
             <select value={matchFilter} onChange={(e) => setMatchFilter(e.target.value)} className="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded-lg bg-white text-gray-700">
               <option value="all">Alle koppelingen</option>
@@ -198,6 +205,7 @@ export default function ContractMapClient() {
                 <div className="flex items-center gap-2">
                   <MatchIcon match={p.match} />
                   <span className="font-medium text-gray-800">{p.contractNumber}</span>
+                  {p.land && <span className="text-[10px] font-semibold text-gray-400">{p.land}</span>}
                   <span className="ml-auto"><StatusBadge status={p.status} /></span>
                 </div>
                 <div className="pl-5.5 flex justify-between gap-2 text-xs text-gray-500">

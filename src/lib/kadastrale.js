@@ -1,4 +1,6 @@
 // Parser voor vrije-tekst kadastrale aanduidingen uit cp-001.
+// België: CaPaKey, bv. "44812A0403/00D002" (afdeling, sectie, grondnummer/bisnummer, exponent, macht).
+// Nederland:
 // Voorbeelden: "VLS M-1462", "Vlissingen O-1491, O-1537 en O-1540", "BSL A-1603 tm 1605 VLS M1406 tm 1414",
 // "Vl. M1338 en Bors. A1296", "VLS O-1320-1355-1356-1357g-1366", "Vlissingen sectie C nummer 2241"
 const GEMEENTEN = [
@@ -19,22 +21,29 @@ function gemeenteFor(word) {
 const TOKEN =
   /([Ss]as van [Gg]ent)|\b([A-Z]{1,2})\s*-?\s*(\d{1,5})([Gg](?:ed)?\b)?|\b([Tt]\/?[Mm])\b|(\(?[Gg]ed\.?\)?)|\b([A-Za-z]+\.?)(?=[\s,(]|$)|\b(\d{1,5})([Gg](?:ed)?\b)?/g
 
-// Geeft [{ gemeente, sectie, perceelnummer, partial }] terug; leeg als er niets herkenbaars in staat
+const CAPAKEY = /\b(\d{5}[A-Z]\d{4}\/\d{2}[A-Z_]\d{3})\b/g
+
+// Geeft percelen terug; leeg als er niets herkenbaars in staat.
+// NL: { land: 'NL', gemeente, sectie, perceelnummer, partial }
+// BE: { land: 'BE', capakey, partial: false }
 export function parseKadastrale(text) {
   const parcels = []
   if (!text) return parcels
-  const src = String(text).replace(/sectie\s+([A-Z]{1,2})\s+(?:nummer|nr\.?)\s*/gi, '$1-')
+  for (const m of String(text).matchAll(CAPAKEY)) parcels.push({ land: 'BE', capakey: m[1], partial: false })
+  const src = String(text)
+    .replace(CAPAKEY, ' ')
+    .replace(/sectie\s+([A-Z]{1,2})\s+(?:nummer|nr\.?)\s*/gi, '$1-')
   let gemeente = null
   let sectie = null
   let pendingRange = false
 
   const add = (nr, partial) => {
     if (!gemeente || !sectie) return
-    const last = parcels[parcels.length - 1]
+    const last = parcels.findLast((p) => p.land === 'NL')
     if (pendingRange && last?.sectie === sectie && nr > last.perceelnummer && nr - last.perceelnummer <= MAX_RANGE) {
-      for (let n = last.perceelnummer + 1; n <= nr; n++) parcels.push({ gemeente, sectie, perceelnummer: n, partial })
+      for (let n = last.perceelnummer + 1; n <= nr; n++) parcels.push({ land: 'NL', gemeente, sectie, perceelnummer: n, partial })
     } else {
-      parcels.push({ gemeente, sectie, perceelnummer: nr, partial })
+      parcels.push({ land: 'NL', gemeente, sectie, perceelnummer: nr, partial })
     }
     pendingRange = false
   }
@@ -67,7 +76,7 @@ export function parseKadastrale(text) {
 
   const seen = new Set()
   return parcels.filter((p) => {
-    const k = `${p.gemeente}|${p.sectie}|${p.perceelnummer}`
+    const k = p.land === 'BE' ? p.capakey : `${p.gemeente}|${p.sectie}|${p.perceelnummer}`
     return seen.has(k) ? false : seen.add(k)
   })
 }
