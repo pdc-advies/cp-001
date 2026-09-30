@@ -6,25 +6,28 @@ import MapView from '@arcgis/core/views/MapView.js'
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer.js'
 import WMSLayer from '@arcgis/core/layers/WMSLayer.js'
 import MapImageLayer from '@arcgis/core/layers/MapImageLayer.js'
+import * as reactiveUtils from '@arcgis/core/core/reactiveUtils.js'
 import '@arcgis/core/assets/esri/themes/light/main.css'
-import { STATUS_CONFIG, contractFields, contractLabels, contractPopup, statusRenderer, toGraphics } from '@/lib/esriContracts'
+import { EDIT_ACTION_ID, STATUS_CONFIG, contractFields, contractLabels, contractPopup, statusRenderer, toGraphics } from '@/lib/esriContracts'
 
 const CADASTRAL_WMS = 'https://service.pdok.nl/kadaster/kadastralekaart/wms/v5_0'
 const BE_CADASTRE = 'https://ccff02.minfin.fgov.be/geoservices/arcgis/rest/services/WMS/Cadastral_Layers/MapServer'
 
 // ArcGIS-kaart met de contracten als FeatureLayer. Alleen client-side laden (next/dynamic, ssr: false).
-export default function ArcgisContractMap({ features, visibleIds, selectedId, onSelect }) {
+export default function ArcgisContractMap({ features, visibleIds, selectedId, onSelect, onEdit }) {
   const containerRef = useRef(null)
   const viewRef = useRef(null)
   const layerRef = useRef(null)
   const cadastreRef = useRef(null)
   const onSelectRef = useRef(onSelect)
+  const onEditRef = useRef(onEdit)
   const [layerView, setLayerView] = useState(null)
   const [showCadastre, setShowCadastre] = useState(true)
 
   useEffect(() => {
     onSelectRef.current = onSelect
-  }, [onSelect])
+    onEditRef.current = onEdit
+  }, [onSelect, onEdit])
 
   useEffect(() => {
     const cadastreNL = new WMSLayer({
@@ -50,6 +53,7 @@ export default function ArcgisContractMap({ features, visibleIds, selectedId, on
       zoom: 10,
     })
     viewRef.current = view
+    view.when().catch(() => {}) // kaart al opgeruimd voordat hij klaar was (AbortError)
 
     view.on('click', async (event) => {
       const { results } = await view.hitTest(event)
@@ -57,7 +61,18 @@ export default function ArcgisContractMap({ features, visibleIds, selectedId, on
       onSelectRef.current(hit ? hit.graphic.attributes.ObjectID : null)
     })
 
+    // Knop "Contract bewerken" in de popup
+    const actionHandle = reactiveUtils.on(
+      () => view.popup,
+      'trigger-action',
+      (event) => {
+        const id = view.popup?.selectedFeature?.attributes?.ObjectID
+        if (event.action.id === EDIT_ACTION_ID && id != null) onEditRef.current?.(id)
+      }
+    )
+
     return () => {
+      actionHandle.remove()
       view.destroy()
       viewRef.current = null
     }
@@ -84,11 +99,14 @@ export default function ArcgisContractMap({ features, visibleIds, selectedId, on
     layerRef.current = layer
 
     let cancelled = false
-    view.whenLayerView(layer).then((lv) => {
-      if (cancelled) return
-      setLayerView(lv)
-      view.goTo(graphics, { duration: 800 }).catch(() => {})
-    })
+    view
+      .whenLayerView(layer)
+      .then((lv) => {
+        if (cancelled) return
+        setLayerView(lv)
+        view.goTo(graphics, { duration: 800 }).catch(() => {})
+      })
+      .catch(() => {}) // laag of kaart is al opgeruimd (AbortError)
 
     return () => {
       cancelled = true
@@ -112,9 +130,12 @@ export default function ArcgisContractMap({ features, visibleIds, selectedId, on
       return
     }
     const handle = layerView.highlight(selectedId)
-    layerRef.current?.queryFeatures({ objectIds: [selectedId], returnGeometry: true }).then(({ features: hits }) => {
-      if (hits.length) viewRef.current?.goTo(hits[0].geometry.extent.clone().expand(1.6), { duration: 600 }).catch(() => {})
-    })
+    layerRef.current
+      ?.queryFeatures({ objectIds: [selectedId], returnGeometry: true })
+      .then(({ features: hits }) => {
+        if (hits.length) viewRef.current?.goTo(hits[0].geometry.extent.clone().expand(1.6), { duration: 600 }).catch(() => {})
+      })
+      .catch(() => {}) // laag is al opgeruimd (AbortError)
     return () => handle.remove()
   }, [layerView, selectedId])
 

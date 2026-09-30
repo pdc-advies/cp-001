@@ -30,7 +30,7 @@ function formatCurrency(v) {
   return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }).format(v)
 }
 
-export default function ContractEditForm({ contract, customers, btwCodes = [] }) {
+export default function ContractEditForm({ contract, customers, btwCodes = [], returnTo = '/' }) {
   const router = useRouter()
 
   const [form, setForm] = useState({
@@ -128,7 +128,7 @@ export default function ContractEditForm({ contract, customers, btwCodes = [] })
         const d = await res.json()
         throw new Error(d.error || 'Fout bij opslaan')
       }
-      router.push('/')
+      router.push(returnTo)
     } catch (err) {
       setError(err.message)
       setSaving(false)
@@ -141,7 +141,8 @@ export default function ContractEditForm({ contract, customers, btwCodes = [] })
       <div className="flex items-center gap-4 mb-6">
         <button
           type="button"
-          onClick={() => router.push('/')}
+          onClick={() => router.push(returnTo)}
+          title={returnTo === '/' ? 'Terug naar contracten' : 'Terug naar de kaart'}
           className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -151,7 +152,7 @@ export default function ContractEditForm({ contract, customers, btwCodes = [] })
           <p className="text-sm text-gray-400">{contract.contractNumber}</p>
         </div>
         <div className="ml-auto flex items-center gap-3">
-          <button type="button" onClick={() => router.push('/')} className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+          <button type="button" onClick={() => router.push(returnTo)} className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
             Annuleren
           </button>
           <button

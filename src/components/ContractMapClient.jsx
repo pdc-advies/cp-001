@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
-import { Search, Download, MapPin, CircleAlert, CircleDashed, X, Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Search, Download, MapPin, CircleAlert, CircleDashed, X, Loader2, Pencil } from 'lucide-react'
 import { STATUS_CONFIG } from '@/lib/esriContracts'
 
 // ArcGIS draait alleen in de browser
@@ -39,21 +40,30 @@ function MatchIcon({ match }) {
   return <Icon className={`w-3.5 h-3.5 shrink-0 ${className}`} aria-label={label} />
 }
 
-function Detail({ p, onClose }) {
+function Detail({ p, onClose, onEdit }) {
   const diff = p.kadasterM2 && p.m2 ? Math.round((p.m2 / p.kadasterM2) * 1000) / 10 : null
   return (
     <div className="border-t border-gray-200 bg-white px-4 py-3 text-sm max-h-72 overflow-auto">
       <div className="flex items-start justify-between gap-2 mb-2">
         <div>
           <div className="flex items-center gap-2">
-            <a href={`/contracts/${p.id}`} className="font-semibold text-gray-900 hover:text-blue-600">{p.contractNumber}</a>
+            <span className="font-semibold text-gray-900">{p.contractNumber}</span>
             <StatusBadge status={p.status} />
           </div>
           <p className="text-gray-500 text-xs mt-0.5">{p.customerName} · {p.contractType || '—'}</p>
         </div>
-        <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-700 rounded" title="Sluiten">
-          <X className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => onEdit(p.id)}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+            Contract bewerken
+          </button>
+          <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-700 rounded" title="Sluiten">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       </div>
       <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
         <dt className="text-gray-500">Looptijd</dt><dd className="text-right">{fmtDate(p.startDate)} – {fmtDate(p.endDate)}</dd>
@@ -83,6 +93,7 @@ function Detail({ p, onClose }) {
 }
 
 export default function ContractMapClient() {
+  const router = useRouter()
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
@@ -97,6 +108,9 @@ export default function ContractMapClient() {
         const json = await res.json()
         if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`)
         setData(json)
+        // Terug van de bewerkpagina: hetzelfde contract weer selecteren
+        const fromEdit = Number(new URLSearchParams(window.location.search).get('contract'))
+        if (fromEdit) setSelectedId(fromEdit)
       })
       .catch((err) => setError(err.message))
   }, [])
@@ -126,6 +140,8 @@ export default function ContractMapClient() {
     for (const f of features) c[f.properties.match]++
     return c
   }, [features])
+
+  const editContract = useCallback((id) => router.push(`/contracts/${id}?terug=kaart`), [router])
 
   const exportGeoJSON = () => {
     const collection = { type: 'FeatureCollection', features: features.filter((f) => f.geometry) }
@@ -217,11 +233,11 @@ export default function ContractMapClient() {
           </ul>
         </div>
 
-        {selected && <Detail p={selected} onClose={() => setSelectedId(null)} />}
+        {selected && <Detail p={selected} onClose={() => setSelectedId(null)} onEdit={editContract} />}
       </section>
 
       <section className="flex-1 min-w-0">
-        <ArcgisContractMap features={features} visibleIds={visibleIds} selectedId={activeSelectedId} onSelect={setSelectedId} />
+        <ArcgisContractMap features={features} visibleIds={visibleIds} selectedId={activeSelectedId} onSelect={setSelectedId} onEdit={editContract} />
       </section>
     </div>
   )

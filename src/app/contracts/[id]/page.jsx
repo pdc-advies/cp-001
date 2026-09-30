@@ -8,7 +8,10 @@ function serializeDate(d) {
   return d ? (d instanceof Date ? d.toISOString().split('T')[0] : String(d).split('T')[0]) : null
 }
 
-export default async function ContractEditPage({ params }) {
+export default async function ContractEditPage({ params, searchParams }) {
+  // Alleen vaste terugroutes toestaan (geen vrije URL's)
+  const terug = (await searchParams)?.terug
+  const returnTo = terug === 'kaart' ? `/kaart?contract=${parseInt(params.id)}` : '/'
   let contract, customers = [], btwCodes = []
   try {
     ;[contract, customers, btwCodes] = await Promise.all([
@@ -30,5 +33,5 @@ export default async function ContractEditPage({ params }) {
     updatedAt: contract.updatedAt.toISOString(),
   }
 
-  return <ContractEditForm contract={serialized} customers={customers} btwCodes={btwCodes} />
+  return <ContractEditForm contract={serialized} customers={customers} btwCodes={btwCodes} returnTo={returnTo} />
 }

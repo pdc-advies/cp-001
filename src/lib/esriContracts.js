@@ -86,8 +86,11 @@ export const contractLabels = [
 const alias = Object.fromEntries(contractFields.map((f) => [f.name, f.alias]))
 const field = (fieldName, format) => ({ fieldName, label: alias[fieldName], ...(format && { format }) })
 
+export const EDIT_ACTION_ID = 'contract-bewerken'
+
 export const contractPopup = {
   title: '{contract_nr} · {klant}',
+  actions: [{ type: 'button', id: EDIT_ACTION_ID, title: 'Contract bewerken', icon: 'pencil' }],
   content: [
     {
       type: 'fields',
