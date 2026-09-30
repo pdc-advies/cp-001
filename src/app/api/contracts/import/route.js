@@ -29,7 +29,7 @@ function mapStatus(val) {
   if (!val) return 'draft'
   const s = String(val).toLowerCase().trim()
   if (s === 'lopend' || s === 'vernieuwen') return 'active'
-  if (s.startsWith('beindig') || s.startsWith('beëindig')) return 'expired'
+  if (s.startsWith('beindig') || s.startsWith('beëindig') || s.startsWith('beeindig')) return 'expired'
   return 'draft'
 }
 
