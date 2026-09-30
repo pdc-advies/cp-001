@@ -10,6 +10,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@arcgis/core": "^5.1.26",
     "@prisma/client": "^6.0.0",
     "exceljs": "^4.4.0",
     "lucide-react": "^0.468.0",
