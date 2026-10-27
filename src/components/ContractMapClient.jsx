@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
-import { Search, Download, MapPin, CircleAlert, CircleDashed, X, Loader2, Pencil, Save } from 'lucide-react'
+import { Search, Download, MapPin, CircleAlert, CircleDashed, X, Loader2, Pencil, Save, ListTodo } from 'lucide-react'
 import { STATUS_CONFIG } from '@/lib/esriContracts'
+import { TEAMS } from '@/lib/teams'
 import ContractNotes from './ContractNotes'
 
 // ArcGIS draait alleen in de browser
@@ -147,7 +148,7 @@ function EditForm({ p, onCancel, onSaved, onFullForm }) {
   )
 }
 
-function Detail({ p, editing, onClose, onEdit, onCancelEdit, onSaved, onFullForm }) {
+function Detail({ p, editing, onClose, onEdit, onCancelEdit, onSaved, onFullForm, onNotesChange }) {
   const diff = p.kadasterM2 && p.m2 ? Math.round((p.m2 / p.kadasterM2) * 1000) / 10 : null
   return (
     <div className={`border-t border-gray-200 bg-white px-4 py-3 text-sm overflow-auto ${editing ? 'max-h-[60%]' : 'max-h-[50%]'}`}>
@@ -202,8 +203,8 @@ function Detail({ p, editing, onClose, onEdit, onCancelEdit, onSaved, onFullForm
           <p className="mt-2 text-xs text-amber-700">Bevat gedeeltelijke percelen: de kaart toont het hele perceel.</p>
         )}
         {p.description && <p className="mt-2 text-xs text-gray-600">{p.description}</p>}
-        <h3 className="mt-3 mb-1.5 text-xs font-semibold text-gray-800">Notities</h3>
-        <ContractNotes key={p.id} contractId={p.id} legacy={p.notes} compact />
+        <h3 className="mt-3 mb-1.5 text-xs font-semibold text-gray-800">Notities en acties</h3>
+        <ContractNotes key={p.id} contractId={p.id} legacy={p.notes} compact onChange={onNotesChange} />
       </>
       )}
     </div>
@@ -218,6 +219,7 @@ export default function ContractMapClient() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [matchFilter, setMatchFilter] = useState('all')
   const [landFilter, setLandFilter] = useState('all')
+  const [actieFilter, setActieFilter] = useState('all')
   const [selectedId, setSelectedId] = useState(null)
   const [editingId, setEditingId] = useState(null)
 
@@ -247,20 +249,26 @@ export default function ContractMapClient() {
       if (landFilter !== 'all' && !(p.land || '').includes(landFilter)) return false
       if (matchFilter === 'kaart' && !['volledig', 'deels'].includes(p.match)) return false
       if (matchFilter === 'niet' && ['volledig', 'deels'].includes(p.match)) return false
+      if (actieFilter === 'open' && !p.openActies.length) return false
+      if (actieFilter !== 'all' && actieFilter !== 'open' && !p.openActies.includes(actieFilter)) return false
       if (!q) return true
       return [p.contractNumber, p.customerName, p.kadastrale, p.debiteurnummer, p.kostenplaats].some((v) =>
         (v || '').toLowerCase().includes(q)
       )
     })
-  }, [features, search, statusFilter, matchFilter, landFilter])
+  }, [features, search, statusFilter, matchFilter, landFilter, actieFilter])
 
   const visibleIds = useMemo(() => new Set(filtered.map((f) => f.properties.id)), [filtered])
   const activeSelectedId = visibleIds.has(selectedId) ? selectedId : null
   const selected = features.find((f) => f.properties.id === activeSelectedId)?.properties
 
   const counts = useMemo(() => {
-    const c = { volledig: 0, deels: 0, geen: 0, onleesbaar: 0 }
-    for (const f of features) c[f.properties.match]++
+    const c = { volledig: 0, deels: 0, geen: 0, onleesbaar: 0, acties: 0, perTeam: {} }
+    for (const f of features) {
+      c[f.properties.match]++
+      c.acties += f.properties.openActies.length
+      for (const team of f.properties.openActies) c.perTeam[team] = (c.perTeam[team] || 0) + 1
+    }
     return c
   }, [features])
 
@@ -274,6 +282,8 @@ export default function ContractMapClient() {
     await loadData()
     setEditingId(null)
   }, [loadData])
+  // Na een nieuwe of afgeronde actie de markeringen in de lijst bijwerken
+  const reloadData = useCallback(() => loadData().catch((err) => setError(err.message)), [loadData])
   const selectContract = useCallback((id) => {
     setSelectedId(id)
     setEditingId((current) => (current === id ? current : null))
@@ -337,6 +347,17 @@ export default function ContractMapClient() {
               <option value="niet">Niet op de kaart</option>
             </select>
           </div>
+          <select
+            value={actieFilter}
+            onChange={(e) => setActieFilter(e.target.value)}
+            className={`w-full px-2 py-1.5 text-sm border rounded-lg bg-white ${actieFilter === 'all' ? 'border-gray-300 text-gray-700' : 'border-amber-400 text-amber-800'}`}
+          >
+            <option value="all">Alle contracten (acties: {counts.acties} open)</option>
+            <option value="open">Met open acties ({counts.acties})</option>
+            {Object.entries(TEAMS).map(([key, t]) => (
+              <option key={key} value={key}>Open acties {t.label} ({counts.perTeam[key] || 0})</option>
+            ))}
+          </select>
         </div>
 
         <div className="flex-1 min-h-0 overflow-auto">
@@ -358,6 +379,15 @@ export default function ContractMapClient() {
                   <MatchIcon match={p.match} />
                   <span className="font-medium text-gray-800">{p.contractNumber}</span>
                   {p.land && <span className="text-[10px] font-semibold text-gray-400">{p.land}</span>}
+                  {p.openActies.length > 0 && (
+                    <span
+                      title={`Open acties: ${p.openActies.map((t) => TEAMS[t]?.label ?? t).join(', ')}`}
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-600/20"
+                    >
+                      <ListTodo className="w-3 h-3" />
+                      {p.openActies.length}
+                    </span>
+                  )}
                   <span className="ml-auto"><StatusBadge status={p.status} /></span>
                 </div>
                 <div className="pl-5.5 flex justify-between gap-2 text-xs text-gray-500">
@@ -378,6 +408,7 @@ export default function ContractMapClient() {
             onCancelEdit={() => setEditingId(null)}
             onSaved={afterSave}
             onFullForm={openFullForm}
+            onNotesChange={reloadData}
           />
         )}
       </section>

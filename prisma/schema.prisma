@@ -43,7 +43,7 @@ model Contract {
   @@map("contracts")
 }
 
-// Notities met datum/tijd en auteur (de inlognaam); alleen toevoegen, niet wijzigen
+// Notities met datum/tijd en auteur (de inlognaam); tekst niet wijzigbaar
 model ContractNote {
   id         Int      @id @default(autoincrement())
   contractId Int      @map("contract_id")
@@ -51,6 +51,10 @@ model ContractNote {
   text       String
   author     String
   createdAt  DateTime @default(now()) @map("created_at")
+  // Optioneel toegewezen aan een team (zie src/lib/teams.js): dan is het een actie die afgerond kan worden
+  team       String?
+  doneAt     DateTime? @map("done_at")
+  doneBy     String?   @map("done_by")
 
   @@index([contractId])
   @@map("contract_notes")
