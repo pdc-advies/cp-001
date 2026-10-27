@@ -55,7 +55,6 @@ const PATCH_FIELDS = {
   m2: (v) => (v === '' || v == null ? null : Number(v)),
   kadastrale: (v) => v || null,
   description: (v) => v || null,
-  notes: (v) => v || null,
 }
 
 export async function PATCH(request, { params }) {

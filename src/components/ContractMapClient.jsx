@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { Search, Download, MapPin, CircleAlert, CircleDashed, X, Loader2, Pencil, Save } from 'lucide-react'
 import { STATUS_CONFIG } from '@/lib/esriContracts'
+import ContractNotes from './ContractNotes'
 
 // ArcGIS draait alleen in de browser
 const ArcgisContractMap = dynamic(() => import('./ArcgisContractMap'), {
@@ -61,7 +62,6 @@ function EditForm({ p, onCancel, onSaved, onFullForm }) {
     m2: p.m2 ?? '',
     kadastrale: p.kadastrale ?? '',
     description: p.description ?? '',
-    notes: p.notes ?? '',
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
@@ -125,9 +125,6 @@ function EditForm({ p, onCancel, onSaved, onFullForm }) {
         <Field label="Omschrijving" className="col-span-2">
           <textarea rows={2} value={form.description} onChange={set('description')} className={`${inputClass} resize-none`} />
         </Field>
-        <Field label="Notities" className="col-span-2">
-          <textarea rows={2} value={form.notes} onChange={set('notes')} className={`${inputClass} resize-none`} />
-        </Field>
       </div>
       {error && <p className="px-2 py-1.5 text-xs rounded-md bg-red-50 border border-red-200 text-red-700">{error}</p>}
       <div className="flex items-center gap-2 pt-1">
@@ -153,7 +150,7 @@ function EditForm({ p, onCancel, onSaved, onFullForm }) {
 function Detail({ p, editing, onClose, onEdit, onCancelEdit, onSaved, onFullForm }) {
   const diff = p.kadasterM2 && p.m2 ? Math.round((p.m2 / p.kadasterM2) * 1000) / 10 : null
   return (
-    <div className={`border-t border-gray-200 bg-white px-4 py-3 text-sm overflow-auto ${editing ? 'max-h-[60%]' : 'max-h-72'}`}>
+    <div className={`border-t border-gray-200 bg-white px-4 py-3 text-sm overflow-auto ${editing ? 'max-h-[60%]' : 'max-h-[50%]'}`}>
       <div className="flex items-start justify-between gap-2 mb-2">
         <div>
           <div className="flex items-center gap-2">
@@ -205,6 +202,8 @@ function Detail({ p, editing, onClose, onEdit, onCancelEdit, onSaved, onFullForm
           <p className="mt-2 text-xs text-amber-700">Bevat gedeeltelijke percelen: de kaart toont het hele perceel.</p>
         )}
         {p.description && <p className="mt-2 text-xs text-gray-600">{p.description}</p>}
+        <h3 className="mt-3 mb-1.5 text-xs font-semibold text-gray-800">Notities</h3>
+        <ContractNotes key={p.id} contractId={p.id} legacy={p.notes} compact />
       </>
       )}
     </div>
