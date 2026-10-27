@@ -21,6 +21,7 @@ export default function ArcgisContractMap({ features, visibleIds, selectedId, on
   const cadastreRef = useRef(null)
   const onSelectRef = useRef(onSelect)
   const onEditRef = useRef(onEdit)
+  const fittedRef = useRef(false)
   const [layerView, setLayerView] = useState(null)
   const [showCadastre, setShowCadastre] = useState(true)
 
@@ -104,6 +105,9 @@ export default function ArcgisContractMap({ features, visibleIds, selectedId, on
       .then((lv) => {
         if (cancelled) return
         setLayerView(lv)
+        // Alleen bij de eerste keer alles in beeld; na opslaan blijft de kaart staan
+        if (fittedRef.current) return
+        fittedRef.current = true
         view.goTo(graphics, { duration: 800 }).catch(() => {})
       })
       .catch(() => {}) // laag of kaart is al opgeruimd (AbortError)

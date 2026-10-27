@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowLeft, Save, Map as MapIcon } from 'lucide-react'
 
 const inputClass = 'w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
 const labelClass = 'block text-xs font-medium text-gray-500 mb-1'
@@ -152,6 +152,15 @@ export default function ContractEditForm({ contract, customers, btwCodes = [], r
           <p className="text-sm text-gray-400">{contract.contractNumber}</p>
         </div>
         <div className="ml-auto flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => router.push(`/kaart?contract=${contract.id}`)}
+            title="Dit contract op de kaart bekijken (niet-opgeslagen wijzigingen gaan verloren)"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100"
+          >
+            <MapIcon className="w-4 h-4" />
+            Toon op kaart
+          </button>
           <button type="button" onClick={() => router.push(returnTo)} className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
             Annuleren
           </button>

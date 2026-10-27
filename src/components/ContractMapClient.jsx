@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
-import { Search, Download, MapPin, CircleAlert, CircleDashed, X, Loader2, Pencil } from 'lucide-react'
+import { Search, Download, MapPin, CircleAlert, CircleDashed, X, Loader2, Pencil, Save } from 'lucide-react'
 import { STATUS_CONFIG } from '@/lib/esriContracts'
 
 // ArcGIS draait alleen in de browser
@@ -40,10 +40,120 @@ function MatchIcon({ match }) {
   return <Icon className={`w-3.5 h-3.5 shrink-0 ${className}`} aria-label={label} />
 }
 
-function Detail({ p, onClose, onEdit }) {
+const inputClass = 'w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
+
+function Field({ label, className = '', children }) {
+  return (
+    <label className={`block ${className}`}>
+      <span className="block text-[11px] font-medium text-gray-500 mb-0.5">{label}</span>
+      {children}
+    </label>
+  )
+}
+
+// Snel bewerken van de velden die op de kaart relevant zijn; financiële velden via het volledige formulier
+function EditForm({ p, onCancel, onSaved, onFullForm }) {
+  const [form, setForm] = useState({
+    status: p.status ?? 'draft',
+    contractType: p.contractType ?? '',
+    startDate: p.startDate ?? '',
+    endDate: p.endDate ?? '',
+    m2: p.m2 ?? '',
+    kadastrale: p.kadastrale ?? '',
+    description: p.description ?? '',
+    notes: p.notes ?? '',
+  })
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState(null)
+  const set = (f) => (e) => setForm((prev) => ({ ...prev, [f]: e.target.value }))
+
+  const save = async (e) => {
+    e.preventDefault()
+    setSaving(true)
+    setError(null)
+    try {
+      const res = await fetch(`/api/contracts/${p.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      if (!res.ok) throw new Error((await res.json()).error || 'Fout bij opslaan')
+      await onSaved()
+    } catch (err) {
+      setError(err.message)
+      setSaving(false)
+    }
+  }
+
+  return (
+    <form onSubmit={save} className="space-y-2">
+      <div className="grid grid-cols-2 gap-2">
+        <Field label="Status">
+          <select value={form.status} onChange={set('status')} className={inputClass}>
+            <option value="draft">Concept</option>
+            <option value="active">Actief</option>
+            <option value="expired">Verlopen</option>
+          </select>
+        </Field>
+        <Field label="Type contract">
+          <input type="text" value={form.contractType} onChange={set('contractType')} placeholder="Erfpacht, Huur…" className={inputClass} />
+        </Field>
+        <Field label="Startdatum">
+          <input type="date" required value={form.startDate} onChange={set('startDate')} className={inputClass} />
+        </Field>
+        <Field label="Einddatum">
+          <input type="date" value={form.endDate} onChange={set('endDate')} className={inputClass} />
+        </Field>
+        <Field label="Kadastrale aanduiding" className="col-span-2">
+          <input type="text" value={form.kadastrale} onChange={set('kadastrale')} className={inputClass} />
+        </Field>
+        <Field label="Oppervlakte contract (m²)">
+          <input type="number" step="0.01" min="0" value={form.m2} onChange={set('m2')} className={inputClass} />
+        </Field>
+        <div className="flex items-end">
+          {p.kadasterM2 != null && (
+            <button
+              type="button"
+              onClick={() => setForm((prev) => ({ ...prev, m2: p.kadasterM2 }))}
+              title="Zet de contract-m² gelijk aan de kadastrale grootte"
+              className="px-2 py-1.5 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100"
+            >
+              Kadaster overnemen ({fmtNum(p.kadasterM2)} m²)
+            </button>
+          )}
+        </div>
+        <Field label="Omschrijving" className="col-span-2">
+          <textarea rows={2} value={form.description} onChange={set('description')} className={`${inputClass} resize-none`} />
+        </Field>
+        <Field label="Notities" className="col-span-2">
+          <textarea rows={2} value={form.notes} onChange={set('notes')} className={`${inputClass} resize-none`} />
+        </Field>
+      </div>
+      {error && <p className="px-2 py-1.5 text-xs rounded-md bg-red-50 border border-red-200 text-red-700">{error}</p>}
+      <div className="flex items-center gap-2 pt-1">
+        <button
+          type="submit"
+          disabled={saving}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-60"
+        >
+          {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+          {saving ? 'Opslaan…' : 'Opslaan'}
+        </button>
+        <button type="button" onClick={onCancel} className="px-2.5 py-1.5 text-xs text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+          Annuleren
+        </button>
+        <button type="button" onClick={() => onFullForm(p.id)} className="ml-auto text-xs text-blue-600 hover:underline">
+          Volledig formulier
+        </button>
+      </div>
+    </form>
+  )
+}
+
+function Detail({ p, editing, onClose, onEdit, onCancelEdit, onSaved, onFullForm }) {
   const diff = p.kadasterM2 && p.m2 ? Math.round((p.m2 / p.kadasterM2) * 1000) / 10 : null
   return (
-    <div className="border-t border-gray-200 bg-white px-4 py-3 text-sm max-h-72 overflow-auto">
+    <div className={`border-t border-gray-200 bg-white px-4 py-3 text-sm overflow-auto ${editing ? 'max-h-[60%]' : 'max-h-72'}`}>
       <div className="flex items-start justify-between gap-2 mb-2">
         <div>
           <div className="flex items-center gap-2">
@@ -53,40 +163,49 @@ function Detail({ p, onClose, onEdit }) {
           <p className="text-gray-500 text-xs mt-0.5">{p.customerName} · {p.contractType || '—'}</p>
         </div>
         <div className="flex items-center gap-1">
-          <button
-            onClick={() => onEdit(p.id)}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-          >
-            <Pencil className="w-3.5 h-3.5" />
-            Contract bewerken
-          </button>
+          {!editing && (
+            <button
+              onClick={() => onEdit(p.id)}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              Bewerken
+            </button>
+          )}
           <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-700 rounded" title="Sluiten">
             <X className="w-4 h-4" />
           </button>
         </div>
       </div>
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
-        <dt className="text-gray-500">Looptijd</dt><dd className="text-right">{fmtDate(p.startDate)} – {fmtDate(p.endDate)}</dd>
-        <dt className="text-gray-500">Jaarprijs</dt><dd className="text-right">{fmtEur(p.jaarprijs)}</dd>
-        <dt className="text-gray-500">m² contract / kadaster</dt>
-        <dd className="text-right">{fmtNum(p.m2)} / {fmtNum(p.kadasterM2)}{diff != null && <span className="text-gray-400"> ({diff}%)</span>}</dd>
-        <dt className="text-gray-500">Kadastrale aanduiding</dt><dd className="text-right">{p.kadastrale || '—'}</dd>
-      </dl>
-      {p.percelen.length > 0 && (
-        <ul className="mt-2 space-y-0.5 text-xs">
-          {p.percelen.map((perceel) => (
-            <li key={perceel.label} className="flex items-center gap-2">
-              {perceel.gevonden ? <MapPin className="w-3 h-3 text-blue-500" /> : <CircleAlert className="w-3 h-3 text-red-500" />}
-              <span className="text-gray-700">{perceel.label}</span>
-              <span className="text-gray-400">
-                {perceel.gevonden ? `${perceel.land === 'BE' ? 'kadaster BE' : perceel.brk} · ${fmtNum(perceel.grootte)} m²` : 'niet (meer) in kadaster'}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-      {p.heeftGedeeltelijk && (
-        <p className="mt-2 text-xs text-amber-700">Bevat gedeeltelijke percelen: de kaart toont het hele perceel.</p>
+      {editing ? (
+        <EditForm key={p.id} p={p} onCancel={onCancelEdit} onSaved={onSaved} onFullForm={onFullForm} />
+      ) : (
+      <>
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
+          <dt className="text-gray-500">Looptijd</dt><dd className="text-right">{fmtDate(p.startDate)} – {fmtDate(p.endDate)}</dd>
+          <dt className="text-gray-500">Jaarprijs</dt><dd className="text-right">{fmtEur(p.jaarprijs)}</dd>
+          <dt className="text-gray-500">m² contract / kadaster</dt>
+          <dd className="text-right">{fmtNum(p.m2)} / {fmtNum(p.kadasterM2)}{diff != null && <span className="text-gray-400"> ({diff}%)</span>}</dd>
+          <dt className="text-gray-500">Kadastrale aanduiding</dt><dd className="text-right">{p.kadastrale || '—'}</dd>
+        </dl>
+        {p.percelen.length > 0 && (
+          <ul className="mt-2 space-y-0.5 text-xs">
+            {p.percelen.map((perceel) => (
+              <li key={perceel.label} className="flex items-center gap-2">
+                {perceel.gevonden ? <MapPin className="w-3 h-3 text-blue-500" /> : <CircleAlert className="w-3 h-3 text-red-500" />}
+                <span className="text-gray-700">{perceel.label}</span>
+                <span className="text-gray-400">
+                  {perceel.gevonden ? `${perceel.land === 'BE' ? 'kadaster BE' : perceel.brk} · ${fmtNum(perceel.grootte)} m²` : 'niet (meer) in kadaster'}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+        {p.heeftGedeeltelijk && (
+          <p className="mt-2 text-xs text-amber-700">Bevat gedeeltelijke percelen: de kaart toont het hele perceel.</p>
+        )}
+        {p.description && <p className="mt-2 text-xs text-gray-600">{p.description}</p>}
+      </>
       )}
     </div>
   )
@@ -101,19 +220,24 @@ export default function ContractMapClient() {
   const [matchFilter, setMatchFilter] = useState('all')
   const [landFilter, setLandFilter] = useState('all')
   const [selectedId, setSelectedId] = useState(null)
+  const [editingId, setEditingId] = useState(null)
+
+  const loadData = useCallback(async () => {
+    const res = await fetch('/api/contracts/geo')
+    const json = await res.json()
+    if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`)
+    setData(json)
+  }, [])
 
   useEffect(() => {
-    fetch('/api/contracts/geo')
-      .then(async (res) => {
-        const json = await res.json()
-        if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`)
-        setData(json)
-        // Terug van de bewerkpagina: hetzelfde contract weer selecteren
-        const fromEdit = Number(new URLSearchParams(window.location.search).get('contract'))
-        if (fromEdit) setSelectedId(fromEdit)
+    loadData()
+      .then(() => {
+        // Vanaf het contract of terug van de bewerkpagina: dit contract selecteren
+        const fromContract = Number(new URLSearchParams(window.location.search).get('contract'))
+        if (fromContract) setSelectedId(fromContract)
       })
       .catch((err) => setError(err.message))
-  }, [])
+  }, [loadData])
 
   const features = useMemo(() => data?.features ?? [], [data])
 
@@ -141,7 +265,20 @@ export default function ContractMapClient() {
     return c
   }, [features])
 
-  const editContract = useCallback((id) => router.push(`/contracts/${id}?terug=kaart`), [router])
+  const editContract = useCallback((id) => {
+    setSelectedId(id)
+    setEditingId(id)
+  }, [])
+  const openFullForm = useCallback((id) => router.push(`/contracts/${id}?terug=kaart`), [router])
+  // Na opslaan opnieuw ophalen: een gewijzigde kadastrale aanduiding geeft andere percelen
+  const afterSave = useCallback(async () => {
+    await loadData()
+    setEditingId(null)
+  }, [loadData])
+  const selectContract = useCallback((id) => {
+    setSelectedId(id)
+    setEditingId((current) => (current === id ? current : null))
+  }, [])
 
   const exportGeoJSON = () => {
     const collection = { type: 'FeatureCollection', features: features.filter((f) => f.geometry) }
@@ -215,7 +352,7 @@ export default function ContractMapClient() {
             {filtered.map(({ properties: p }) => (
               <li
                 key={p.id}
-                onClick={() => setSelectedId(p.id)}
+                onClick={() => selectContract(p.id)}
                 className={`px-4 py-2 cursor-pointer text-sm ${activeSelectedId === p.id ? 'bg-blue-100/70' : 'hover:bg-gray-50'}`}
               >
                 <div className="flex items-center gap-2">
@@ -233,11 +370,21 @@ export default function ContractMapClient() {
           </ul>
         </div>
 
-        {selected && <Detail p={selected} onClose={() => setSelectedId(null)} onEdit={editContract} />}
+        {selected && (
+          <Detail
+            p={selected}
+            editing={editingId === selected.id}
+            onClose={() => selectContract(null)}
+            onEdit={editContract}
+            onCancelEdit={() => setEditingId(null)}
+            onSaved={afterSave}
+            onFullForm={openFullForm}
+          />
+        )}
       </section>
 
       <section className="flex-1 min-w-0">
-        <ArcgisContractMap features={features} visibleIds={visibleIds} selectedId={activeSelectedId} onSelect={setSelectedId} onEdit={editContract} />
+        <ArcgisContractMap features={features} visibleIds={visibleIds} selectedId={activeSelectedId} onSelect={selectContract} onEdit={editContract} />
       </section>
     </div>
   )

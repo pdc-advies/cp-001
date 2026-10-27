@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback, useRef } from 'react'
-import { Search, Plus, Download, Pencil, Trash2, FileText, Upload, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react'
+import { Search, Plus, Download, Pencil, Trash2, FileText, Upload, AlertTriangle, ChevronDown, ChevronRight, MapPin } from 'lucide-react'
 import ContractModal from './ContractModal'
 
 const STATUS_CONFIG = {
@@ -416,6 +416,15 @@ export default function ContractsClient({ initialContracts, initialCustomers = [
                               ? formatCurrency(contract.m2 * contract.pricePerM2)
                               : formatCurrency(contract.contractValue)}
                           </span>
+                          {contract.kadastrale && (
+                            <a
+                              href={`/kaart?contract=${contract.id}`}
+                              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                              title="Toon op kaart"
+                            >
+                              <MapPin className="w-4 h-4" />
+                            </a>
+                          )}
                           <a
                             href={`/contracts/${contract.id}`}
                             className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
