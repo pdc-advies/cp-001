@@ -59,6 +59,8 @@ export async function GET() {
           contractType: c.contractType,
           status: c.status,
           kadastrale: c.kadastrale,
+          description: c.description,
+          notes: c.notes,
           startDate: day(c.startDate),
           endDate: day(c.endDate),
           m2: c.m2,

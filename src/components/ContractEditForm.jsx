@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowLeft, Save, Map as MapIcon } from 'lucide-react'
+import ContractNotes from './ContractNotes'
 
 const inputClass = 'w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
 const labelClass = 'block text-xs font-medium text-gray-500 mb-1'
@@ -30,7 +31,7 @@ function formatCurrency(v) {
   return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }).format(v)
 }
 
-export default function ContractEditForm({ contract, customers, btwCodes = [] }) {
+export default function ContractEditForm({ contract, customers, btwCodes = [], returnTo = '/' }) {
   const router = useRouter()
 
   const [form, setForm] = useState({
@@ -128,7 +129,7 @@ export default function ContractEditForm({ contract, customers, btwCodes = [] })
         const d = await res.json()
         throw new Error(d.error || 'Fout bij opslaan')
       }
-      router.push('/')
+      router.push(returnTo)
     } catch (err) {
       setError(err.message)
       setSaving(false)
@@ -141,7 +142,8 @@ export default function ContractEditForm({ contract, customers, btwCodes = [] })
       <div className="flex items-center gap-4 mb-6">
         <button
           type="button"
-          onClick={() => router.push('/')}
+          onClick={() => router.push(returnTo)}
+          title={returnTo === '/' ? 'Terug naar contracten' : 'Terug naar de kaart'}
           className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -151,7 +153,16 @@ export default function ContractEditForm({ contract, customers, btwCodes = [] })
           <p className="text-sm text-gray-400">{contract.contractNumber}</p>
         </div>
         <div className="ml-auto flex items-center gap-3">
-          <button type="button" onClick={() => router.push('/')} className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+          <button
+            type="button"
+            onClick={() => router.push(`/kaart?contract=${contract.id}`)}
+            title="Dit contract op de kaart bekijken (niet-opgeslagen wijzigingen gaan verloren)"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100"
+          >
+            <MapIcon className="w-4 h-4" />
+            Toon op kaart
+          </button>
+          <button type="button" onClick={() => router.push(returnTo)} className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
             Annuleren
           </button>
           <button
@@ -350,7 +361,13 @@ export default function ContractEditForm({ contract, customers, btwCodes = [] })
 
         {/* Notities */}
         <Section title="Notities">
-          <textarea rows={4} value={form.notes} onChange={set('notes')} className={`${inputClass} resize-none`} />
+          <p className="text-xs text-gray-400 -mt-2">Een notitie wordt direct opgeslagen, met datum, tijd en je inlognaam.</p>
+          <ContractNotes contractId={contract.id} />
+          {contract.notes && (
+            <Field label="Eerdere notitie (zonder datum)">
+              <textarea rows={3} value={form.notes} onChange={set('notes')} className={`${inputClass} resize-none`} />
+            </Field>
+          )}
         </Section>
       </form>
     </div>

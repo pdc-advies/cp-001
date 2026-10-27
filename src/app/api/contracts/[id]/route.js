@@ -29,6 +29,7 @@ export async function PUT(request, { params }) {
         debiteurnummer: body.debiteurnummer ?? null,
         kadastrale: body.kadastrale ?? null,
         grootboekNieuw: body.grootboekNieuw ?? null,
+        grootboekOud: body.grootboekOud ?? null,
         btwCode: body.btwCode ?? null,
         invoiceRef: body.invoiceRef ?? null,
         fixedPrice: body.fixedPrice ?? false,
@@ -36,6 +37,41 @@ export async function PUT(request, { params }) {
         notes: body.notes ?? null
       }
     })
+    return NextResponse.json(contract)
+  } catch (err) {
+    if (err.code === 'P2025') {
+      return NextResponse.json({ error: 'Contract niet gevonden' }, { status: 404 })
+    }
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
+}
+
+// Gedeeltelijke update vanuit de kaart: alleen deze velden, de rest blijft ongemoeid
+const PATCH_FIELDS = {
+  status: (v) => v || 'draft',
+  contractType: (v) => v || null,
+  startDate: (v) => new Date(v),
+  endDate: (v) => (v ? new Date(v) : null),
+  m2: (v) => (v === '' || v == null ? null : Number(v)),
+  kadastrale: (v) => v || null,
+  description: (v) => v || null,
+}
+
+export async function PATCH(request, { params }) {
+  try {
+    const id = parseInt(params.id)
+    const body = await request.json()
+    const data = {}
+    for (const [field, convert] of Object.entries(PATCH_FIELDS)) {
+      if (field in body) data[field] = convert(body[field])
+    }
+    if ('startDate' in data && isNaN(data.startDate)) {
+      return NextResponse.json({ error: 'Startdatum is verplicht' }, { status: 400 })
+    }
+    if ('m2' in data && data.m2 != null && isNaN(data.m2)) {
+      return NextResponse.json({ error: 'm² moet een getal zijn' }, { status: 400 })
+    }
+    const contract = await prisma.contract.update({ where: { id }, data })
     return NextResponse.json(contract)
   } catch (err) {
     if (err.code === 'P2025') {
