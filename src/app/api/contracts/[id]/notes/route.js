@@ -1,13 +1,9 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { TEAMS } from '@/lib/teams'
+import { author } from '@/lib/authUser'
 
 export const dynamic = 'force-dynamic'
-
-// Inlognaam zoals de middleware die meegeeft; nooit uit de body, zodat de auteur niet te vervalsen is
-function author(request) {
-  const raw = request.headers.get('x-auth-user')
-  return raw ? decodeURIComponent(raw) : 'onbekend'
-}
 
 export async function GET(request, { params }) {
   try {
@@ -22,9 +18,12 @@ export async function GET(request, { params }) {
 export async function POST(request, { params }) {
   try {
     const contractId = parseInt((await params).id)
-    const text = String((await request.json()).text ?? '').trim()
+    const body = await request.json()
+    const text = String(body.text ?? '').trim()
     if (!text) return NextResponse.json({ error: 'Notitie is leeg' }, { status: 400 })
-    const note = await prisma.contractNote.create({ data: { contractId, text, author: author(request) } })
+    const team = body.team || null
+    if (team && !TEAMS[team]) return NextResponse.json({ error: 'Onbekend team' }, { status: 400 })
+    const note = await prisma.contractNote.create({ data: { contractId, text, team, author: author(request) } })
     return NextResponse.json(note, { status: 201 })
   } catch (err) {
     if (err.code === 'P2003') {

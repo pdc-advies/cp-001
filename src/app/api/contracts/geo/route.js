@@ -20,10 +20,14 @@ const day = (d) => (d instanceof Date ? d.toISOString().slice(0, 10) : null)
 // NL-percelen via PDOK (BRK), BE-percelen (CaPaKey) via de federale kadasterdienst.
 export async function GET() {
   try {
-    const [contracts, customers] = await Promise.all([
+    const [contracts, customers, openActions] = await Promise.all([
       prisma.contract.findMany({ orderBy: { contractNumber: 'asc' } }),
       prisma.customer.findMany(),
+      prisma.contractNote.findMany({ where: { team: { not: null }, doneAt: null }, select: { contractId: true, team: true } }),
     ])
+    // Open acties per contract: lijst met teams (een team kan vaker voorkomen)
+    const actionsByContract = {}
+    for (const a of openActions) (actionsByContract[a.contractId] ??= []).push(a.team)
     // Klantnaam via debiteurnummer (ook het oude nummer), zoals in de contractlijst
     const customerByDebiteur = {}
     for (const k of customers) {
@@ -61,6 +65,7 @@ export async function GET() {
           kadastrale: c.kadastrale,
           description: c.description,
           notes: c.notes,
+          openActies: actionsByContract[c.id] ?? [],
           startDate: day(c.startDate),
           endDate: day(c.endDate),
           m2: c.m2,
