@@ -35,6 +35,7 @@ export async function DELETE(request, { params }) {
     const invoice = await prisma.invoice.findFirst({ where: { id } })
     if (!invoice) return NextResponse.json({ error: 'Factuur niet gevonden' }, { status: 404 })
     if (invoice.status === 'geboekt') return NextResponse.json({ error: 'Een geboekte factuur kan niet verwijderd worden' }, { status: 400 })
+    if (invoice.creditOfId) return NextResponse.json({ error: 'Een creditfactuur kan niet verwijderd worden' }, { status: 400 })
     await prisma.invoice.delete({ where: { id } })
     return new Response(null, { status: 204 })
   } catch (err) {

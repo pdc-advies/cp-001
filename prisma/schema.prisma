@@ -64,6 +64,9 @@ model Invoice {
   taxYear        Int?      @map("tax_year")
   taxReceivedAt  DateTime? @db.Date @map("tax_received_at")
   taxReference   String?   @map("tax_reference")
+  // Correctie van een geboekte aanslag: creditfactuur (creditOfId) plus nieuwe factuur; het origineel wordt credited
+  creditOfId     Int?      @map("credit_of_id")
+  credited       Boolean   @default(false)
   contractNumber String    @map("contract_number")
   debiteurnummer String?
   customerName   String    @map("customer_name")

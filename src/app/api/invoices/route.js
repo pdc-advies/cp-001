@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { author } from '@/lib/authUser'
 import { isDemo } from '@/lib/demo'
-import { BELASTINGEN, buildInvoice, buildTaxInvoice, periodsFor } from '@/lib/invoicing'
+import { BELASTINGEN, buildInvoice, buildTaxInvoice, creditLines, periodsFor } from '@/lib/invoicing'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,30 +28,57 @@ async function createTaxInvoice(request, contract, base, body) {
   const received = new Date(body.receivedAt)
   if (isNaN(received)) return NextResponse.json({ error: 'Vul de ontvangstdatum van de aanslag in' }, { status: 400 })
 
-  const dubbel = await prisma.invoice.findFirst({ where: { contractId: contract.id, type: 'belasting', taxType, taxYear } })
-  if (dubbel) return NextResponse.json({ error: `Aanslagjaar ${taxYear} is al doorbelast` }, { status: 409 })
+  // Per aanslagjaar telt één lopende factuur; een correctie vervangt een geboekte factuur
+  const bestaand = await prisma.invoice.findFirst({
+    where: { contractId: contract.id, type: 'belasting', taxType, taxYear, creditOfId: null, credited: false },
+  })
+  const corrigeert = body.corrects != null
+  if (bestaand && !corrigeert) return NextResponse.json({ error: `Aanslagjaar ${taxYear} is al doorbelast` }, { status: 409 })
+  if (corrigeert && bestaand?.id !== Number(body.corrects)) {
+    return NextResponse.json({ error: 'Deze factuur kan niet meer gecorrigeerd worden' }, { status: 400 })
+  }
+  if (corrigeert && bestaand.status !== 'geboekt') {
+    return NextResponse.json({ error: 'Alleen een geboekte factuur wordt gecorrigeerd; verwijder deze factuur anders' }, { status: 400 })
+  }
 
   const result = buildTaxInvoice(contractDates(contract), { taxType, year: taxYear, amount: body.amount }, base.btwPercentage)
   if (result.error) return NextResponse.json({ error: result.error }, { status: 400 })
+  if (corrigeert && result.subtotal === bestaand.subtotal) {
+    return NextResponse.json({ error: 'Het bedrag is gelijk aan de bestaande factuur' }, { status: 400 })
+  }
 
-  const invoice = await prisma.invoice.create({
-    data: {
-      ...base.data,
-      type: 'belasting',
-      taxType,
-      taxYear,
-      taxReceivedAt: received,
-      taxReference: reference || null,
-      frequency: 'Jaar',
-      periodLabel: `${BELASTINGEN[taxType].label} ${taxYear}`,
-      periodStart: new Date(`${taxYear}-01-01`),
-      periodEnd: new Date(`${taxYear}-12-31`),
-      lines: result.lines,
-      subtotal: result.subtotal,
-      vatAmount: result.vatAmount,
-      total: result.total,
-    },
-  })
+  const data = {
+    ...base.data,
+    type: 'belasting',
+    taxType,
+    taxYear,
+    taxReceivedAt: received,
+    taxReference: reference || null,
+    frequency: 'Jaar',
+    periodLabel: `${BELASTINGEN[taxType].label} ${taxYear}`,
+    periodStart: new Date(`${taxYear}-01-01`),
+    periodEnd: new Date(`${taxYear}-12-31`),
+    lines: result.lines,
+    subtotal: result.subtotal,
+    vatAmount: result.vatAmount,
+    total: result.total,
+  }
+  if (!corrigeert) return NextResponse.json(await prisma.invoice.create({ data }), { status: 201 })
+
+  const credit = {
+    ...data,
+    creditOfId: bestaand.id,
+    periodLabel: `Credit ${data.periodLabel}`,
+    lines: creditLines(bestaand.lines),
+    subtotal: -bestaand.subtotal,
+    vatAmount: -bestaand.vatAmount,
+    total: -bestaand.total,
+  }
+  const [, , invoice] = await prisma.$transaction([
+    prisma.invoice.update({ where: { id: bestaand.id }, data: { credited: true } }),
+    prisma.invoice.create({ data: credit }),
+    prisma.invoice.create({ data }),
+  ])
   return NextResponse.json(invoice, { status: 201 })
 }
 
