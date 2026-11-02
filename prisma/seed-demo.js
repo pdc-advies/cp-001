@@ -45,18 +45,46 @@ const NOTES = [
   { contractNumber: 'DEMO-BE-01', text: 'Jaarlijkse indexatie besproken met de klant, akkoord.', team: null },
 ]
 
+// Facturatievelden: wisselende frequenties en, voor België, een verzonnen KI met de tarieven van Leuven 2026
+// (1170 = percelen met een economische aard). Ook voor een al gevulde demodatabase.
+const OV_LEUVEN = { ovGemeente: 'Leuven (gedifferentieerd 1170)', ovProvincie: 'Vlaams-Brabant', ovOpcentiemenGemeente: 1170, ovOpcentiemenProvincie: 171.75 }
+const BILLING = {
+  'DEMO-NL-01': { invoiceFrequency: 'Jaar' },
+  'DEMO-NL-02': { invoiceFrequency: 'Maand' },
+  'DEMO-BE-01': { invoiceFrequency: 'Kwartaal', kadastraalInkomen: 18500, ...OV_LEUVEN },
+  'DEMO-BE-02': { invoiceFrequency: 'Maand', kadastraalInkomen: 6200, ...OV_LEUVEN },
+  'DEMO-BE-03': { invoiceFrequency: 'Kwartaal', kadastraalInkomen: 9400, ...OV_LEUVEN },
+  'DEMO-BE-04': { invoiceFrequency: 'Jaar', kadastraalInkomen: 14800, ...OV_LEUVEN },
+  'DEMO-BE-05': { invoiceFrequency: 'Kwartaal', kadastraalInkomen: 5300, ...OV_LEUVEN },
+}
+
+async function applyBilling() {
+  for (const [contractNumber, data] of Object.entries(BILLING)) {
+    await prisma.contract.updateMany({ where: { contractNumber }, data })
+  }
+}
+
 const day = (s) => (s ? new Date(`${s}T00:00:00Z`) : null)
 
 async function main() {
   const count = await prisma.contract.count()
   if (process.argv.includes('--reset')) {
     if (count > 50) throw new Error(`Database heeft ${count} contracten: dit is geen demodatabase, --reset geweigerd`)
+    await prisma.invoice.deleteMany()
     await prisma.contractNote.deleteMany()
     await prisma.contract.deleteMany()
     await prisma.customer.deleteMany()
     await prisma.btwCode.deleteMany()
   } else if (count > 0) {
-    console.log(`seed-demo: database bevat al ${count} contracten, niets gedaan`)
+    // Eenmalig bijwerken zodra deze velden erbij komen; latere wijzigingen in de demo blijven staan
+    const billed = await prisma.contract.count({ where: { kadastraalInkomen: { not: null } } })
+    const demoData = await prisma.contract.count({ where: { contractNumber: 'DEMO-BE-01' } })
+    if (demoData && !billed) {
+      await applyBilling()
+      console.log('seed-demo: facturatievelden toegevoegd')
+    } else {
+      console.log(`seed-demo: database bevat al ${count} contracten, niets gedaan`)
+    }
     return
   }
 
@@ -70,6 +98,7 @@ async function main() {
     })
     idByNumber[c.contractNumber] = created.id
   }
+  await applyBilling()
   for (const n of NOTES) {
     await prisma.contractNote.create({ data: { contractId: idByNumber[n.contractNumber], text: n.text, team: n.team, author: 'Demo' } })
   }

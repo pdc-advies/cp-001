@@ -38,9 +38,44 @@ model Contract {
   notes          String?
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
+  // Onroerende voorheffing (Vlaanderen); de tarieven staan op het contract zodat ze aanpasbaar zijn
+  kadastraalInkomen       Float?  @map("kadastraal_inkomen")
+  ovGemeente              String? @map("ov_gemeente")
+  ovProvincie             String? @map("ov_provincie")
+  ovOpcentiemenGemeente   Float?  @map("ov_opcentiemen_gemeente")
+  ovOpcentiemenProvincie  Float?  @map("ov_opcentiemen_provincie")
   contractNotes  ContractNote[]
+  invoices       Invoice[]
 
   @@map("contracts")
+}
+
+// Facturen uit het contract (demo): aangemaakt in CP-001, verzonden naar en geboekt in de Unit4-simulatie
+model Invoice {
+  id             Int       @id @default(autoincrement())
+  contractId     Int       @map("contract_id")
+  contract       Contract  @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  contractNumber String    @map("contract_number")
+  debiteurnummer String?
+  customerName   String    @map("customer_name")
+  frequency      String
+  periodLabel    String    @map("period_label")
+  periodStart    DateTime  @db.Date @map("period_start")
+  periodEnd      DateTime  @db.Date @map("period_end")
+  lines          Json
+  subtotal       Float
+  vatAmount      Float     @map("vat_amount")
+  total          Float
+  status         String    @default("aangemaakt")
+  createdBy      String    @map("created_by")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  sentAt         DateTime? @map("sent_at")
+  bookedAt       DateTime? @map("booked_at")
+  bookedBy       String?   @map("booked_by")
+  unit4Number    String?   @map("unit4_number")
+
+  @@index([contractId])
+  @@map("invoices")
 }
 
 // Notities met datum/tijd en auteur (de inlognaam); tekst niet wijzigbaar

@@ -1,0 +1,1537 @@
+{
+"jaar": 2026,
+"bron": "https://assets.vlaanderen.be/raw/upload/v1773065110/OV_OverzichtOpcentiemen_fxdocl.xlsx",
+"provincies": {
+"Antwerpen": 160,
+"Limburg": 214.52,
+"Oost-Vlaanderen": 148.47,
+"Vlaams-Brabant": 171.75,
+"West-Vlaanderen": 186.22
+},
+"gemeenten": [
+{
+"naam": "Aalst",
+"opcentiemen": 944
+},
+{
+"naam": "Aalter",
+"opcentiemen": 975
+},
+{
+"naam": "Aarschot",
+"opcentiemen": 944.58
+},
+{
+"naam": "Aartselaar",
+"opcentiemen": 795
+},
+{
+"naam": "Affligem",
+"opcentiemen": 785
+},
+{
+"naam": "Alken",
+"opcentiemen": 925
+},
+{
+"naam": "Alveringem",
+"opcentiemen": 1417
+},
+{
+"naam": "Antwerpen (gedifferentieerd 850)",
+"opcentiemen": 850
+},
+{
+"naam": "Antwerpen (gedifferentieerd 0)",
+"opcentiemen": 0
+},
+{
+"naam": "Anzegem",
+"opcentiemen": 1152
+},
+{
+"naam": "Ardooie",
+"opcentiemen": 598
+},
+{
+"naam": "Arendonk",
+"opcentiemen": 882
+},
+{
+"naam": "As",
+"opcentiemen": 630
+},
+{
+"naam": "Asse",
+"opcentiemen": 786
+},
+{
+"naam": "Assenede",
+"opcentiemen": 818
+},
+{
+"naam": "Avelgem",
+"opcentiemen": 1259
+},
+{
+"naam": "Baarle-Hertog",
+"opcentiemen": 895.42
+},
+{
+"naam": "Balen",
+"opcentiemen": 880.67
+},
+{
+"naam": "Beernem",
+"opcentiemen": 1080
+},
+{
+"naam": "Beerse",
+"opcentiemen": 875
+},
+{
+"naam": "Beersel (gedifferentieerd 690)",
+"opcentiemen": 690
+},
+{
+"naam": "Beersel (gedifferentieerd 1190)",
+"opcentiemen": 1190
+},
+{
+"naam": "Begijnendijk",
+"opcentiemen": 899
+},
+{
+"naam": "Bekkevoort",
+"opcentiemen": 882
+},
+{
+"naam": "Beringen",
+"opcentiemen": 955
+},
+{
+"naam": "Berlaar",
+"opcentiemen": 1165
+},
+{
+"naam": "Berlare",
+"opcentiemen": 880
+},
+{
+"naam": "Bertem",
+"opcentiemen": 661
+},
+{
+"naam": "Bever",
+"opcentiemen": 1071
+},
+{
+"naam": "Beveren-Kruibeke-Zwijndrecht (gedifferentieerd 882)",
+"opcentiemen": 882
+},
+{
+"naam": "Beveren-Kruibeke-Zwijndrecht (gedifferentieerd 1000)",
+"opcentiemen": 1000
+},
+{
+"naam": "Bierbeek",
+"opcentiemen": 690
+},
+{
+"naam": "Bilzen-Hoeselt",
+"opcentiemen": 970
+},
+{
+"naam": "Blankenberge",
+"opcentiemen": 1099
+},
+{
+"naam": "Bocholt",
+"opcentiemen": 976.07
+},
+{
+"naam": "Boechout (gedifferentieerd 930)",
+"opcentiemen": 930
+},
+{
+"naam": "Boechout (gedifferentieerd 975)",
+"opcentiemen": 975
+},
+{
+"naam": "Bonheiden",
+"opcentiemen": 724.18
+},
+{
+"naam": "Boom",
+"opcentiemen": 976
+},
+{
+"naam": "Boortmeerbeek",
+"opcentiemen": 850
+},
+{
+"naam": "Bornem",
+"opcentiemen": 989
+},
+{
+"naam": "Boutersem",
+"opcentiemen": 795
+},
+{
+"naam": "Brakel",
+"opcentiemen": 818.64
+},
+{
+"naam": "Brasschaat",
+"opcentiemen": 667
+},
+{
+"naam": "Brecht",
+"opcentiemen": 627
+},
+{
+"naam": "Bredene",
+"opcentiemen": 1295
+},
+{
+"naam": "Bree",
+"opcentiemen": 944
+},
+{
+"naam": "Brugge",
+"opcentiemen": 1007.56
+},
+{
+"naam": "Buggenhout",
+"opcentiemen": 819
+},
+{
+"naam": "Damme",
+"opcentiemen": 1134
+},
+{
+"naam": "De Haan",
+"opcentiemen": 881.61
+},
+{
+"naam": "De Panne",
+"opcentiemen": 1228
+},
+{
+"naam": "Deerlijk",
+"opcentiemen": 1071
+},
+{
+"naam": "Deinze",
+"opcentiemen": 693
+},
+{
+"naam": "Denderleeuw",
+"opcentiemen": 950
+},
+{
+"naam": "Dendermonde (gedifferentieerd 996.22)",
+"opcentiemen": 996.22
+},
+{
+"naam": "Dendermonde (gedifferentieerd 1031.48)",
+"opcentiemen": 1031.48
+},
+{
+"naam": "Dendermonde (gedifferentieerd 1119.64)",
+"opcentiemen": 1119.64
+},
+{
+"naam": "Dentergem",
+"opcentiemen": 929
+},
+{
+"naam": "Dessel",
+"opcentiemen": 850
+},
+{
+"naam": "Destelbergen",
+"opcentiemen": 890
+},
+{
+"naam": "Diepenbeek",
+"opcentiemen": 875.31
+},
+{
+"naam": "Diest",
+"opcentiemen": 982
+},
+{
+"naam": "Diksmuide",
+"opcentiemen": 1295
+},
+{
+"naam": "Dilbeek (gedifferentieerd 1100)",
+"opcentiemen": 1100
+},
+{
+"naam": "Dilbeek (gedifferentieerd 790)",
+"opcentiemen": 790
+},
+{
+"naam": "Dilsen-Stokkem",
+"opcentiemen": 810
+},
+{
+"naam": "Drogenbos",
+"opcentiemen": 724
+},
+{
+"naam": "Duffel",
+"opcentiemen": 724.18
+},
+{
+"naam": "Edegem",
+"opcentiemen": 627
+},
+{
+"naam": "Eeklo",
+"opcentiemen": 1100
+},
+{
+"naam": "Erpe-Mere",
+"opcentiemen": 755.67
+},
+{
+"naam": "Essen",
+"opcentiemen": 875
+},
+{
+"naam": "Evergem",
+"opcentiemen": 875
+},
+{
+"naam": "Gavere",
+"opcentiemen": 900
+},
+{
+"naam": "Geel (gedifferentieerd 1037)",
+"opcentiemen": 1037
+},
+{
+"naam": "Geel (gedifferentieerd 987)",
+"opcentiemen": 987
+},
+{
+"naam": "Geel (gedifferentieerd 940)",
+"opcentiemen": 940
+},
+{
+"naam": "Geel (gedifferentieerd 895)",
+"opcentiemen": 895
+},
+{
+"naam": "Geel (gedifferentieerd 800)",
+"opcentiemen": 800
+},
+{
+"naam": "Geetbets",
+"opcentiemen": 945
+},
+{
+"naam": "Genk",
+"opcentiemen": 850.13
+},
+{
+"naam": "Gent",
+"opcentiemen": 1088
+},
+{
+"naam": "Geraardsbergen",
+"opcentiemen": 981.62
+},
+{
+"naam": "Gingelom",
+"opcentiemen": 1039
+},
+{
+"naam": "Gistel (gedifferentieerd 0)",
+"opcentiemen": 0
+},
+{
+"naam": "Gistel (gedifferentieerd 1100)",
+"opcentiemen": 1100
+},
+{
+"naam": "Gistel (gedifferentieerd 1030)",
+"opcentiemen": 1030
+},
+{
+"naam": "Glabbeek",
+"opcentiemen": 897
+},
+{
+"naam": "Grimbergen",
+"opcentiemen": 800
+},
+{
+"naam": "Grobbendonk",
+"opcentiemen": 850
+},
+{
+"naam": "Haacht",
+"opcentiemen": 850
+},
+{
+"naam": "Haaltert",
+"opcentiemen": 940
+},
+{
+"naam": "Halen",
+"opcentiemen": 945
+},
+{
+"naam": "Halle",
+"opcentiemen": 920
+},
+{
+"naam": "Hamme",
+"opcentiemen": 1039
+},
+{
+"naam": "Hamont-Achel",
+"opcentiemen": 900
+},
+{
+"naam": "Harelbeke",
+"opcentiemen": 1350
+},
+{
+"naam": "Hasselt",
+"opcentiemen": 986.4
+},
+{
+"naam": "Hechtel-Eksel",
+"opcentiemen": 893
+},
+{
+"naam": "Heers",
+"opcentiemen": 1007.56
+},
+{
+"naam": "Heist-Op-Den-Berg",
+"opcentiemen": 913
+},
+{
+"naam": "Hemiksem",
+"opcentiemen": 976
+},
+{
+"naam": "Herent",
+"opcentiemen": 882
+},
+{
+"naam": "Herentals",
+"opcentiemen": 995
+},
+{
+"naam": "Herenthout",
+"opcentiemen": 944
+},
+{
+"naam": "Herk-De-Stad (gedifferentieerd 756)",
+"opcentiemen": 756
+},
+{
+"naam": "Herk-De-Stad (gedifferentieerd 0)",
+"opcentiemen": 0
+},
+{
+"naam": "Herselt",
+"opcentiemen": 850
+},
+{
+"naam": "Herstappe",
+"opcentiemen": 728
+},
+{
+"naam": "Herzele",
+"opcentiemen": 1060
+},
+{
+"naam": "Heusden-Zolder (gedifferentieerd 935)",
+"opcentiemen": 935
+},
+{
+"naam": "Heusden-Zolder (gedifferentieerd 1206.15)",
+"opcentiemen": 1206.15
+},
+{
+"naam": "Heusden-Zolder (gedifferentieerd 1252.9)",
+"opcentiemen": 1252.9
+},
+{
+"naam": "Heusden-Zolder (gedifferentieerd 1280.95)",
+"opcentiemen": 1280.95
+},
+{
+"naam": "Heusden-Zolder (gedifferentieerd 1317.68)",
+"opcentiemen": 1317.68
+},
+{
+"naam": "Heuvelland",
+"opcentiemen": 1215
+},
+{
+"naam": "Hoegaarden",
+"opcentiemen": 900
+},
+{
+"naam": "Hoeilaart",
+"opcentiemen": 693
+},
+{
+"naam": "Holsbeek",
+"opcentiemen": 818.64
+},
+{
+"naam": "Hooglede (gedifferentieerd 1133)",
+"opcentiemen": 1133
+},
+{
+"naam": "Hooglede (gedifferentieerd 1200)",
+"opcentiemen": 1200
+},
+{
+"naam": "Hooglede (gedifferentieerd 1300)",
+"opcentiemen": 1300
+},
+{
+"naam": "Hooglede (gedifferentieerd 1350)",
+"opcentiemen": 1350
+},
+{
+"naam": "Hooglede (gedifferentieerd 1400)",
+"opcentiemen": 1400
+},
+{
+"naam": "Hoogstraten",
+"opcentiemen": 950
+},
+{
+"naam": "Horebeke",
+"opcentiemen": 980
+},
+{
+"naam": "Houthalen-Helchteren",
+"opcentiemen": 929
+},
+{
+"naam": "Houthulst",
+"opcentiemen": 1244
+},
+{
+"naam": "Hove",
+"opcentiemen": 861
+},
+{
+"naam": "Huldenberg",
+"opcentiemen": 630
+},
+{
+"naam": "Hulshout",
+"opcentiemen": 896
+},
+{
+"naam": "Ichtegem",
+"opcentiemen": 1070
+},
+{
+"naam": "Ieper",
+"opcentiemen": 945
+},
+{
+"naam": "Ingelmunster",
+"opcentiemen": 1228
+},
+{
+"naam": "Izegem",
+"opcentiemen": 1132.29
+},
+{
+"naam": "Jabbeke",
+"opcentiemen": 976
+},
+{
+"naam": "Kalmthout",
+"opcentiemen": 690
+},
+{
+"naam": "Kampenhout",
+"opcentiemen": 850
+},
+{
+"naam": "Kapellen",
+"opcentiemen": 589
+},
+{
+"naam": "Kapelle-Op-Den-Bos (gedifferentieerd 895)",
+"opcentiemen": 895
+},
+{
+"naam": "Kapelle-Op-Den-Bos (gedifferentieerd 1080)",
+"opcentiemen": 1080
+},
+{
+"naam": "Kapelle-Op-Den-Bos (gedifferentieerd 1145)",
+"opcentiemen": 1145
+},
+{
+"naam": "Kapelle-Op-Den-Bos (gedifferentieerd 1345)",
+"opcentiemen": 1345
+},
+{
+"naam": "Kaprijke (gedifferentieerd 825)",
+"opcentiemen": 825
+},
+{
+"naam": "Kaprijke (gedifferentieerd 875)",
+"opcentiemen": 875
+},
+{
+"naam": "Kaprijke (gedifferentieerd 1200)",
+"opcentiemen": 1200
+},
+{
+"naam": "Kaprijke (gedifferentieerd 1400)",
+"opcentiemen": 1400
+},
+{
+"naam": "Kasterlee",
+"opcentiemen": 714
+},
+{
+"naam": "Keerbergen",
+"opcentiemen": 577.46
+},
+{
+"naam": "Kinrooi",
+"opcentiemen": 940
+},
+{
+"naam": "Kluisbergen",
+"opcentiemen": 950
+},
+{
+"naam": "Knokke-Heist",
+"opcentiemen": 1200
+},
+{
+"naam": "Koekelare",
+"opcentiemen": 1071
+},
+{
+"naam": "Koksijde",
+"opcentiemen": 1200
+},
+{
+"naam": "Kontich (gedifferentieerd 860)",
+"opcentiemen": 860
+},
+{
+"naam": "Kontich (gedifferentieerd 890)",
+"opcentiemen": 890
+},
+{
+"naam": "Kontich (gedifferentieerd 920)",
+"opcentiemen": 920
+},
+{
+"naam": "Kontich (gedifferentieerd 950)",
+"opcentiemen": 950
+},
+{
+"naam": "Kontich (gedifferentieerd 980)",
+"opcentiemen": 980
+},
+{
+"naam": "Kortemark",
+"opcentiemen": 1165
+},
+{
+"naam": "Kortenaken",
+"opcentiemen": 929
+},
+{
+"naam": "Kortenberg",
+"opcentiemen": 598
+},
+{
+"naam": "Kortrijk",
+"opcentiemen": 1102
+},
+{
+"naam": "Kraainem",
+"opcentiemen": 695
+},
+{
+"naam": "Kruisem (gedifferentieerd 693)",
+"opcentiemen": 693
+},
+{
+"naam": "Kruisem (gedifferentieerd 826)",
+"opcentiemen": 826
+},
+{
+"naam": "Kuurne",
+"opcentiemen": 1209
+},
+{
+"naam": "Laakdal",
+"opcentiemen": 877
+},
+{
+"naam": "Laarne",
+"opcentiemen": 787
+},
+{
+"naam": "Lanaken",
+"opcentiemen": 756
+},
+{
+"naam": "Landen",
+"opcentiemen": 945
+},
+{
+"naam": "Langemark-Poelkapelle",
+"opcentiemen": 1196
+},
+{
+"naam": "Lebbeke",
+"opcentiemen": 1040
+},
+{
+"naam": "Lede",
+"opcentiemen": 945
+},
+{
+"naam": "Ledegem",
+"opcentiemen": 1000
+},
+{
+"naam": "Lendelede",
+"opcentiemen": 1250
+},
+{
+"naam": "Lennik",
+"opcentiemen": 878.69
+},
+{
+"naam": "Leopoldsburg",
+"opcentiemen": 850
+},
+{
+"naam": "Leuven (gedifferentieerd 975)",
+"opcentiemen": 975
+},
+{
+"naam": "Leuven (gedifferentieerd 1170)",
+"opcentiemen": 1170
+},
+{
+"naam": "Lichtervelde",
+"opcentiemen": 1208
+},
+{
+"naam": "Liedekerke",
+"opcentiemen": 1038
+},
+{
+"naam": "Lier (gedifferentieerd 995)",
+"opcentiemen": 995
+},
+{
+"naam": "Lier (gedifferentieerd 1054.7)",
+"opcentiemen": 1054.7
+},
+{
+"naam": "Lier (gedifferentieerd 1084.55)",
+"opcentiemen": 1084.55
+},
+{
+"naam": "Lier (gedifferentieerd 1104.45)",
+"opcentiemen": 1104.45
+},
+{
+"naam": "Lier (gedifferentieerd 1121.61)",
+"opcentiemen": 1121.61
+},
+{
+"naam": "Lierde",
+"opcentiemen": 850
+},
+{
+"naam": "Lievegem",
+"opcentiemen": 834
+},
+{
+"naam": "Lille",
+"opcentiemen": 756
+},
+{
+"naam": "Linkebeek",
+"opcentiemen": 882
+},
+{
+"naam": "Lint (gedifferentieerd 873.18)",
+"opcentiemen": 873.18
+},
+{
+"naam": "Lint (gedifferentieerd 970.2)",
+"opcentiemen": 970.2
+},
+{
+"naam": "Lint (gedifferentieerd 1049.58)",
+"opcentiemen": 1049.58
+},
+{
+"naam": "Lint (gedifferentieerd 1266.03)",
+"opcentiemen": 1266.03
+},
+{
+"naam": "Linter",
+"opcentiemen": 920
+},
+{
+"naam": "Lochristi",
+"opcentiemen": 850
+},
+{
+"naam": "Lokeren",
+"opcentiemen": 787
+},
+{
+"naam": "Lommel",
+"opcentiemen": 819
+},
+{
+"naam": "Londerzeel (gedifferentieerd 1250)",
+"opcentiemen": 1250
+},
+{
+"naam": "Londerzeel (gedifferentieerd 976.07)",
+"opcentiemen": 976.07
+},
+{
+"naam": "Lo-Reninge",
+"opcentiemen": 1070
+},
+{
+"naam": "Lubbeek",
+"opcentiemen": 614
+},
+{
+"naam": "Lummen",
+"opcentiemen": 835
+},
+{
+"naam": "Maarkedal",
+"opcentiemen": 819
+},
+{
+"naam": "Maaseik",
+"opcentiemen": 1122
+},
+{
+"naam": "Maasmechelen",
+"opcentiemen": 989
+},
+{
+"naam": "Machelen (gedifferentieerd 725)",
+"opcentiemen": 725
+},
+{
+"naam": "Machelen (gedifferentieerd 761.2)",
+"opcentiemen": 761.2
+},
+{
+"naam": "Machelen (gedifferentieerd 795.8)",
+"opcentiemen": 795.8
+},
+{
+"naam": "Machelen (gedifferentieerd 813.1)",
+"opcentiemen": 813.1
+},
+{
+"naam": "Machelen (gedifferentieerd 839.96)",
+"opcentiemen": 839.96
+},
+{
+"naam": "Maldegem",
+"opcentiemen": 1150
+},
+{
+"naam": "Malle",
+"opcentiemen": 714
+},
+{
+"naam": "Mechelen (gedifferentieerd 1200)",
+"opcentiemen": 1200
+},
+{
+"naam": "Mechelen (gedifferentieerd 1000)",
+"opcentiemen": 1000
+},
+{
+"naam": "Meerhout",
+"opcentiemen": 913
+},
+{
+"naam": "Meise",
+"opcentiemen": 755
+},
+{
+"naam": "Menen",
+"opcentiemen": 1134
+},
+{
+"naam": "Merchtem",
+"opcentiemen": 850
+},
+{
+"naam": "Merelbeke-Melle",
+"opcentiemen": 910
+},
+{
+"naam": "Merksplas",
+"opcentiemen": 820
+},
+{
+"naam": "Mesen",
+"opcentiemen": 1196
+},
+{
+"naam": "Middelkerke",
+"opcentiemen": 1202
+},
+{
+"naam": "Mol",
+"opcentiemen": 756
+},
+{
+"naam": "Moorslede",
+"opcentiemen": 1134
+},
+{
+"naam": "Mortsel",
+"opcentiemen": 895
+},
+{
+"naam": "Nazareth-De Pinte",
+"opcentiemen": 787
+},
+{
+"naam": "Niel",
+"opcentiemen": 1263
+},
+{
+"naam": "Nieuwerkerken",
+"opcentiemen": 945
+},
+{
+"naam": "Nieuwpoort",
+"opcentiemen": 1071
+},
+{
+"naam": "Nijlen",
+"opcentiemen": 819
+},
+{
+"naam": "Ninove",
+"opcentiemen": 940
+},
+{
+"naam": "Olen (gedifferentieerd 750)",
+"opcentiemen": 750
+},
+{
+"naam": "Olen (gedifferentieerd 900)",
+"opcentiemen": 900
+},
+{
+"naam": "Oostende",
+"opcentiemen": 1259.45
+},
+{
+"naam": "Oosterzele",
+"opcentiemen": 950
+},
+{
+"naam": "Oostkamp",
+"opcentiemen": 945
+},
+{
+"naam": "Oostrozebeke",
+"opcentiemen": 1070
+},
+{
+"naam": "Opwijk",
+"opcentiemen": 850.13
+},
+{
+"naam": "Oudenaarde",
+"opcentiemen": 756
+},
+{
+"naam": "Oudenburg",
+"opcentiemen": 1243
+},
+{
+"naam": "Oud-Heverlee",
+"opcentiemen": 693
+},
+{
+"naam": "Oudsbergen",
+"opcentiemen": 838
+},
+{
+"naam": "Oud-Turnhout",
+"opcentiemen": 756
+},
+{
+"naam": "Overijse",
+"opcentiemen": 585
+},
+{
+"naam": "Pajottegem",
+"opcentiemen": 895
+},
+{
+"naam": "Peer",
+"opcentiemen": 975
+},
+{
+"naam": "Pelt (gedifferentieerd 741)",
+"opcentiemen": 741
+},
+{
+"naam": "Pelt (gedifferentieerd 895)",
+"opcentiemen": 895
+},
+{
+"naam": "Pelt (gedifferentieerd 940)",
+"opcentiemen": 940
+},
+{
+"naam": "Pelt (gedifferentieerd 987)",
+"opcentiemen": 987
+},
+{
+"naam": "Pelt (gedifferentieerd 1037)",
+"opcentiemen": 1037
+},
+{
+"naam": "Pepingen",
+"opcentiemen": 850
+},
+{
+"naam": "Pittem",
+"opcentiemen": 1085.6
+},
+{
+"naam": "Poperinge",
+"opcentiemen": 1215
+},
+{
+"naam": "Putte (gedifferentieerd 814.8)",
+"opcentiemen": 814.8
+},
+{
+"naam": "Putte (gedifferentieerd 823.2)",
+"opcentiemen": 823.2
+},
+{
+"naam": "Putte (gedifferentieerd 831.6)",
+"opcentiemen": 831.6
+},
+{
+"naam": "Putte (gedifferentieerd 877.8)",
+"opcentiemen": 877.8
+},
+{
+"naam": "Putte (gedifferentieerd 898.8)",
+"opcentiemen": 898.8
+},
+{
+"naam": "Putte (gedifferentieerd 932.4)",
+"opcentiemen": 932.4
+},
+{
+"naam": "Putte (gedifferentieerd 957.6)",
+"opcentiemen": 957.6
+},
+{
+"naam": "Putte (gedifferentieerd 1014.6)",
+"opcentiemen": 1014.6
+},
+{
+"naam": "Puurs-Sint-Amands (gedifferentieerd 990)",
+"opcentiemen": 990
+},
+{
+"naam": "Puurs-Sint-Amands (gedifferentieerd 1075)",
+"opcentiemen": 1075
+},
+{
+"naam": "Puurs-Sint-Amands (gedifferentieerd 1150)",
+"opcentiemen": 1150
+},
+{
+"naam": "Puurs-Sint-Amands (gedifferentieerd 1225)",
+"opcentiemen": 1225
+},
+{
+"naam": "Ranst (gedifferentieerd 750)",
+"opcentiemen": 750
+},
+{
+"naam": "Ranst (gedifferentieerd 825)",
+"opcentiemen": 825
+},
+{
+"naam": "Ranst (gedifferentieerd 900)",
+"opcentiemen": 900
+},
+{
+"naam": "Ravels",
+"opcentiemen": 787.15
+},
+{
+"naam": "Retie",
+"opcentiemen": 887
+},
+{
+"naam": "Riemst",
+"opcentiemen": 882
+},
+{
+"naam": "Rijkevorsel",
+"opcentiemen": 837.53
+},
+{
+"naam": "Roeselare",
+"opcentiemen": 1140
+},
+{
+"naam": "Ronse",
+"opcentiemen": 1095
+},
+{
+"naam": "Roosdaal",
+"opcentiemen": 661.21
+},
+{
+"naam": "Rotselaar",
+"opcentiemen": 913.1
+},
+{
+"naam": "Rumst",
+"opcentiemen": 787
+},
+{
+"naam": "Schelle",
+"opcentiemen": 970
+},
+{
+"naam": "Scherpenheuvel-Zich",
+"opcentiemen": 988
+},
+{
+"naam": "Schilde",
+"opcentiemen": 551
+},
+{
+"naam": "Schoten",
+"opcentiemen": 724.18
+},
+{
+"naam": "Sint-Genesius-Rode",
+"opcentiemen": 652
+},
+{
+"naam": "Sint-Gillis-Waas",
+"opcentiemen": 945
+},
+{
+"naam": "Sint-Katelijne-Waver (gedifferentieerd 880)",
+"opcentiemen": 880
+},
+{
+"naam": "Sint-Katelijne-Waver (gedifferentieerd 1055)",
+"opcentiemen": 1055
+},
+{
+"naam": "Sint-Laureins",
+"opcentiemen": 950
+},
+{
+"naam": "Sint-Lievens-Houtem",
+"opcentiemen": 941
+},
+{
+"naam": "Sint-Martens-Latem (gedifferentieerd 472)",
+"opcentiemen": 472
+},
+{
+"naam": "Sint-Martens-Latem (gedifferentieerd 610)",
+"opcentiemen": 610
+},
+{
+"naam": "Sint-Martens-Latem (gedifferentieerd 730)",
+"opcentiemen": 730
+},
+{
+"naam": "Sint-Niklaas",
+"opcentiemen": 834.38
+},
+{
+"naam": "Sint-Pieters-Leeuw (gedifferentieerd 980)",
+"opcentiemen": 980
+},
+{
+"naam": "Sint-Pieters-Leeuw (gedifferentieerd 872)",
+"opcentiemen": 872
+},
+{
+"naam": "Sint-Truiden (gedifferentieerd 940)",
+"opcentiemen": 940
+},
+{
+"naam": "Sint-Truiden (gedifferentieerd 990)",
+"opcentiemen": 990
+},
+{
+"naam": "Sint-Truiden (gedifferentieerd 1040)",
+"opcentiemen": 1040
+},
+{
+"naam": "Sint-Truiden (gedifferentieerd 1090)",
+"opcentiemen": 1090
+},
+{
+"naam": "Sint-Truiden (gedifferentieerd 1140)",
+"opcentiemen": 1140
+},
+{
+"naam": "Sint-Truiden (gedifferentieerd 1190)",
+"opcentiemen": 1190
+},
+{
+"naam": "Sint-Truiden (gedifferentieerd 1240)",
+"opcentiemen": 1240
+},
+{
+"naam": "Spiere-Helkijn",
+"opcentiemen": 1400
+},
+{
+"naam": "Stabroek",
+"opcentiemen": 755
+},
+{
+"naam": "Staden",
+"opcentiemen": 1150
+},
+{
+"naam": "Steenokkerzeel (gedifferentieerd 661)",
+"opcentiemen": 661
+},
+{
+"naam": "Steenokkerzeel (gedifferentieerd 860)",
+"opcentiemen": 860
+},
+{
+"naam": "Stekene",
+"opcentiemen": 976
+},
+{
+"naam": "Temse",
+"opcentiemen": 944.58
+},
+{
+"naam": "Ternat (gedifferentieerd 802.9)",
+"opcentiemen": 802.9
+},
+{
+"naam": "Ternat (gedifferentieerd 1250)",
+"opcentiemen": 1250
+},
+{
+"naam": "Tervuren",
+"opcentiemen": 614
+},
+{
+"naam": "Tessenderlo-Ham",
+"opcentiemen": 850.13
+},
+{
+"naam": "Tielt",
+"opcentiemen": 1032
+},
+{
+"naam": "Tielt-Winge",
+"opcentiemen": 850.13
+},
+{
+"naam": "Tienen",
+"opcentiemen": 982
+},
+{
+"naam": "Tongeren-Borgloon",
+"opcentiemen": 900
+},
+{
+"naam": "Torhout",
+"opcentiemen": 1102
+},
+{
+"naam": "Tremelo",
+"opcentiemen": 799
+},
+{
+"naam": "Turnhout",
+"opcentiemen": 953
+},
+{
+"naam": "Veurne",
+"opcentiemen": 1209
+},
+{
+"naam": "Vilvoorde",
+"opcentiemen": 960
+},
+{
+"naam": "Vleteren",
+"opcentiemen": 1259.45
+},
+{
+"naam": "Voeren",
+"opcentiemen": 945
+},
+{
+"naam": "Vorselaar",
+"opcentiemen": 756
+},
+{
+"naam": "Vosselaar",
+"opcentiemen": 630
+},
+{
+"naam": "Waasmunster",
+"opcentiemen": 913.1
+},
+{
+"naam": "Waregem (gedifferentieerd 1006)",
+"opcentiemen": 1006
+},
+{
+"naam": "Waregem (gedifferentieerd 1100)",
+"opcentiemen": 1100
+},
+{
+"naam": "Wellen",
+"opcentiemen": 850
+},
+{
+"naam": "Wemmel (gedifferentieerd 750)",
+"opcentiemen": 750
+},
+{
+"naam": "Wemmel (gedifferentieerd 780)",
+"opcentiemen": 780
+},
+{
+"naam": "Wemmel (gedifferentieerd 810)",
+"opcentiemen": 810
+},
+{
+"naam": "Wemmel (gedifferentieerd 850)",
+"opcentiemen": 850
+},
+{
+"naam": "Wervik",
+"opcentiemen": 1259
+},
+{
+"naam": "Westerlo",
+"opcentiemen": 692
+},
+{
+"naam": "Wetteren",
+"opcentiemen": 976
+},
+{
+"naam": "Wevelgem (gedifferentieerd 1133.5)",
+"opcentiemen": 1133.5
+},
+{
+"naam": "Wevelgem (gedifferentieerd 1250)",
+"opcentiemen": 1250
+},
+{
+"naam": "Wezembeek-Oppem",
+"opcentiemen": 602
+},
+{
+"naam": "Wichelen (gedifferentieerd 881.61)",
+"opcentiemen": 881.61
+},
+{
+"naam": "Wichelen (gedifferentieerd 1100)",
+"opcentiemen": 1100
+},
+{
+"naam": "Wichelen (gedifferentieerd 1200)",
+"opcentiemen": 1200
+},
+{
+"naam": "Wielsbeke",
+"opcentiemen": 1085
+},
+{
+"naam": "Wijnegem (gedifferentieerd 850)",
+"opcentiemen": 850
+},
+{
+"naam": "Wijnegem (gedifferentieerd 892.5)",
+"opcentiemen": 892.5
+},
+{
+"naam": "Wijnegem (gedifferentieerd 935)",
+"opcentiemen": 935
+},
+{
+"naam": "Wijnegem (gedifferentieerd 956.25)",
+"opcentiemen": 956.25
+},
+{
+"naam": "Wijnegem (gedifferentieerd 980.07)",
+"opcentiemen": 980.07
+},
+{
+"naam": "Willebroek (gedifferentieerd 992)",
+"opcentiemen": 992
+},
+{
+"naam": "Willebroek (gedifferentieerd 1170.56)",
+"opcentiemen": 1170.56
+},
+{
+"naam": "Willebroek (gedifferentieerd 1249.92)",
+"opcentiemen": 1249.92
+},
+{
+"naam": "Willebroek (gedifferentieerd 1299.52)",
+"opcentiemen": 1299.52
+},
+{
+"naam": "Willebroek (gedifferentieerd 1401.2)",
+"opcentiemen": 1401.2
+},
+{
+"naam": "Wingene",
+"opcentiemen": 1008
+},
+{
+"naam": "Wommelgem (gedifferentieerd 760)",
+"opcentiemen": 760
+},
+{
+"naam": "Wommelgem (gedifferentieerd 890)",
+"opcentiemen": 890
+},
+{
+"naam": "Wortegem-Petegem",
+"opcentiemen": 882
+},
+{
+"naam": "Wuustwezel",
+"opcentiemen": 740
+},
+{
+"naam": "Zandhoven",
+"opcentiemen": 674
+},
+{
+"naam": "Zaventem",
+"opcentiemen": 472
+},
+{
+"naam": "Zedelgem",
+"opcentiemen": 945
+},
+{
+"naam": "Zele (gedifferentieerd 870)",
+"opcentiemen": 870
+},
+{
+"naam": "Zele (gedifferentieerd 957)",
+"opcentiemen": 957
+},
+{
+"naam": "Zele (gedifferentieerd 1000.5)",
+"opcentiemen": 1000.5
+},
+{
+"naam": "Zele (gedifferentieerd 1087.5)",
+"opcentiemen": 1087.5
+},
+{
+"naam": "Zele (gedifferentieerd 1142.87)",
+"opcentiemen": 1142.87
+},
+{
+"naam": "Zelzate",
+"opcentiemen": 913.1
+},
+{
+"naam": "Zemst",
+"opcentiemen": 850
+},
+{
+"naam": "Zoersel",
+"opcentiemen": 589
+},
+{
+"naam": "Zonhoven",
+"opcentiemen": 850
+},
+{
+"naam": "Zonnebeke",
+"opcentiemen": 1196
+},
+{
+"naam": "Zottegem",
+"opcentiemen": 1070
+},
+{
+"naam": "Zoutleeuw",
+"opcentiemen": 945
+},
+{
+"naam": "Zuienkerke",
+"opcentiemen": 1133.5
+},
+{
+"naam": "Zulte",
+"opcentiemen": 875
+},
+{
+"naam": "Zutendaal",
+"opcentiemen": 788
+},
+{
+"naam": "Zwalm",
+"opcentiemen": 819
+},
+{
+"naam": "Zwevegem",
+"opcentiemen": 1228
+}
+]
+}

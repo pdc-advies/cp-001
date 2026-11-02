@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Search, Download, MapPin, CircleAlert, CircleDashed, X, Loader2, Pencil, Save, ListTodo } from 'lucide-react'
+import { Search, Download, MapPin, CircleAlert, CircleDashed, X, Loader2, Pencil, Save, ListTodo, FileText } from 'lucide-react'
 import { STATUS_CONFIG } from '@/lib/esriContracts'
 import { TEAMS } from '@/lib/teams'
 import ContractNotes from './ContractNotes'
@@ -148,7 +149,7 @@ function EditForm({ p, onCancel, onSaved, onFullForm }) {
   )
 }
 
-function Detail({ p, editing, onClose, onEdit, onCancelEdit, onSaved, onFullForm, onNotesChange }) {
+function Detail({ p, demo, editing, onClose, onEdit, onCancelEdit, onSaved, onFullForm, onNotesChange }) {
   const diff = p.kadasterM2 && p.m2 ? Math.round((p.m2 / p.kadasterM2) * 1000) / 10 : null
   return (
     <div className={`border-t border-gray-200 bg-white px-4 py-3 text-sm overflow-auto ${editing ? 'max-h-[60%]' : 'max-h-[50%]'}`}>
@@ -182,6 +183,11 @@ function Detail({ p, editing, onClose, onEdit, onCancelEdit, onSaved, onFullForm
         <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
           <dt className="text-gray-500">Looptijd</dt><dd className="text-right">{fmtDate(p.startDate)} – {fmtDate(p.endDate)}</dd>
           <dt className="text-gray-500">Jaarprijs</dt><dd className="text-right">{fmtEur(p.jaarprijs)}</dd>
+          {p.ovJaar != null && (
+            <>
+              <dt className="text-gray-500">Onroerende voorheffing (indicatief)</dt><dd className="text-right">{fmtEur(p.ovJaar)}</dd>
+            </>
+          )}
           <dt className="text-gray-500">m² contract / kadaster</dt>
           <dd className="text-right">{fmtNum(p.m2)} / {fmtNum(p.kadasterM2)}{diff != null && <span className="text-gray-400"> ({diff}%)</span>}</dd>
           <dt className="text-gray-500">Kadastrale aanduiding</dt><dd className="text-right">{p.kadastrale || '—'}</dd>
@@ -203,6 +209,12 @@ function Detail({ p, editing, onClose, onEdit, onCancelEdit, onSaved, onFullForm
           <p className="mt-2 text-xs text-amber-700">Bevat gedeeltelijke percelen: de kaart toont het hele perceel.</p>
         )}
         {p.description && <p className="mt-2 text-xs text-gray-600">{p.description}</p>}
+        {demo && (
+          <Link href={`/facturatie?contract=${p.id}`} className="mt-2 inline-flex items-center gap-1.5 text-xs text-blue-600 hover:underline">
+            <FileText className="w-3.5 h-3.5" />
+            Factureren
+          </Link>
+        )}
         <h3 className="mt-3 mb-1.5 text-xs font-semibold text-gray-800">Notities en acties</h3>
         <ContractNotes key={p.id} contractId={p.id} legacy={p.notes} compact onChange={onNotesChange} />
       </>
@@ -211,7 +223,7 @@ function Detail({ p, editing, onClose, onEdit, onCancelEdit, onSaved, onFullForm
   )
 }
 
-export default function ContractMapClient() {
+export default function ContractMapClient({ demo = false }) {
   const router = useRouter()
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
@@ -402,6 +414,7 @@ export default function ContractMapClient() {
         {selected && (
           <Detail
             p={selected}
+            demo={demo}
             editing={editingId === selected.id}
             onClose={() => selectContract(null)}
             onEdit={editContract}

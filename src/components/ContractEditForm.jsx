@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Save, Map as MapIcon } from 'lucide-react'
+import { ArrowLeft, Save, Map as MapIcon, FileText } from 'lucide-react'
 import ContractNotes from './ContractNotes'
 
 const inputClass = 'w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
@@ -31,7 +31,7 @@ function formatCurrency(v) {
   return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }).format(v)
 }
 
-export default function ContractEditForm({ contract, customers, btwCodes = [], returnTo = '/' }) {
+export default function ContractEditForm({ contract, customers, btwCodes = [], returnTo = '/', demo = false }) {
   const router = useRouter()
 
   const [form, setForm] = useState({
@@ -162,6 +162,16 @@ export default function ContractEditForm({ contract, customers, btwCodes = [], r
             <MapIcon className="w-4 h-4" />
             Toon op kaart
           </button>
+          {demo && (
+            <button
+              type="button"
+              onClick={() => router.push(`/facturatie?contract=${contract.id}`)}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100"
+            >
+              <FileText className="w-4 h-4" />
+              Factureren
+            </button>
+          )}
           <button type="button" onClick={() => router.push(returnTo)} className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
             Annuleren
           </button>

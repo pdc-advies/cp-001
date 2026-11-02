@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { parseKadastrale } from '@/lib/kadastrale'
 import { parcelKey, resolveParcels } from '@/lib/pdok'
 import { resolveCapakeys } from '@/lib/cadgis'
+import { berekenOV } from '@/lib/onroerendeVoorheffing'
 
 export const dynamic = 'force-dynamic'
 
@@ -71,6 +72,12 @@ export async function GET() {
           m2: c.m2,
           kadasterM2,
           jaarprijs: annualPrice(c),
+          ovJaar: berekenOV({
+            kadastraalInkomen: c.kadastraalInkomen,
+            jaar: new Date().getFullYear(),
+            opcentiemenGemeente: c.ovOpcentiemenGemeente,
+            opcentiemenProvincie: c.ovOpcentiemenProvincie,
+          })?.totaal ?? null,
           kostenplaats: c.kostenplaats,
           match,
           heeftGedeeltelijk: parcels.some((p) => p.partial),

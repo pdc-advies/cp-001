@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-export default function Nav() {
+export default function Nav({ demo = false }) {
   const path = usePathname()
   const link = (href, label) => (
     <Link
@@ -23,6 +23,8 @@ export default function Nav() {
       {link('/customers', 'Klanten')}
       {link('/kaart', 'Kaart')}
       {link('/btw-codes', 'BTW Codes')}
+      {demo && link('/facturatie', 'Facturatie')}
+      {demo && link('/unit4', 'Unit4 (simulatie)')}
     </nav>
   )
 }
