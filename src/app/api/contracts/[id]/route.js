@@ -67,6 +67,8 @@ const PATCH_FIELDS = {
   ovProvincie: (v) => v || null,
   ovOpcentiemenGemeente: num,
   ovOpcentiemenProvincie: num,
+  wozWaarde: num,
+  ozbTarief: num,
 }
 
 export async function PATCH(request, { params }) {

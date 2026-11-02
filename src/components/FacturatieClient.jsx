@@ -4,13 +4,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Save, RotateCcw, FileText, Send, Trash2, ExternalLink, Calculator } from 'lucide-react'
-import { FREQUENTIES, buildInvoice, periodsFor } from '@/lib/invoicing'
-import { BASISTARIEF, heeftCoefficient } from '@/lib/onroerendeVoorheffing'
+import { BELASTINGEN, FREQUENTIES, berekenOZB, buildInvoice, buildTaxInvoice, contractLiepIn, periodsFor } from '@/lib/invoicing'
+import { BASISTARIEF, COEFFICIENTEN, berekenOV } from '@/lib/onroerendeVoorheffing'
 import { parseKadastrale } from '@/lib/kadastrale'
 import opcentiemen from '@/lib/opcentiemen.json'
 
 const SIMULATOR_URL = 'https://belastingen.fenb.be/ui/public/simulaties/ov'
 const JAREN = [2025, 2026, 2027]
+const AANSLAGJAREN = Object.keys(COEFFICIENTEN).map(Number).reverse()
 
 const inputClass = 'w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400'
 const eur = (v) => new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(v ?? 0)
@@ -23,7 +24,7 @@ const STATUS = {
 }
 
 // De velden waarmee je kunt spelen; lege waarden als '' zodat invoervelden gecontroleerd blijven
-const FIELDS = ['m2', 'pricePerM2', 'fixedPrice', 'contractValue', 'invoiceFrequency', 'btwCode', 'kadastraalInkomen', 'ovGemeente', 'ovProvincie', 'ovOpcentiemenGemeente', 'ovOpcentiemenProvincie']
+const FIELDS = ['m2', 'pricePerM2', 'fixedPrice', 'contractValue', 'invoiceFrequency', 'btwCode', 'kadastraalInkomen', 'ovGemeente', 'ovProvincie', 'ovOpcentiemenGemeente', 'ovOpcentiemenProvincie', 'wozWaarde', 'ozbTarief']
 const toForm = (c) => Object.fromEntries(FIELDS.map((f) => [f, c[f] ?? (f === 'fixedPrice' ? false : '')]))
 
 function Field({ label, children }) {
@@ -61,6 +62,8 @@ export default function FacturatieClient({ contracts, btwCodes, initialId }) {
   const [form, setForm] = useState(saved)
   const [year, setYear] = useState(new Date().getFullYear())
   const [index, setIndex] = useState(0)
+  const [taxYear, setTaxYear] = useState(AANSLAGJAREN[0])
+  const [tax, setTax] = useState({ amount: '', receivedAt: new Date().toISOString().slice(0, 10), reference: '' })
   const [invoices, setInvoices] = useState([])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
@@ -69,6 +72,7 @@ export default function FacturatieClient({ contracts, btwCodes, initialId }) {
     setForm(saved)
     setIndex(0)
     setError(null)
+    setTax((t) => ({ ...t, amount: '', reference: '' }))
   }, [saved])
 
   const loadInvoices = useCallback(async () => {
@@ -101,6 +105,16 @@ export default function FacturatieClient({ contracts, btwCodes, initialId }) {
 
   const contractInvoices = invoices.filter((i) => i.contractId === contract.id)
 
+  // De aanslag is leidend; de berekening is alleen een controle
+  const taxType = isBE ? 'OV' : 'OZB'
+  const ov = isBE
+    ? berekenOV({ kadastraalInkomen: form.kadastraalInkomen, jaar: taxYear, opcentiemenGemeente: form.ovOpcentiemenGemeente, opcentiemenProvincie: form.ovOpcentiemenProvincie })
+    : null
+  const berekend = isBE ? (ov?.totaal ?? null) : berekenOZB(form)
+  const taxPreview = buildTaxInvoice(merged, { taxType, year: taxYear, amount: tax.amount }, btwPercentage)
+  const taxInvoiceFor = (y) => contractInvoices.find((i) => i.type === 'belasting' && i.taxYear === y)
+  const verschil = tax.amount !== '' && berekend != null ? Number(tax.amount) - berekend : null
+
   const pickGemeente = (e) => {
     const gemeente = opcentiemen.gemeenten.find((g) => g.naam === e.target.value)
     setForm((p) => ({ ...p, ovGemeente: e.target.value, ovOpcentiemenGemeente: gemeente?.opcentiemen ?? p.ovOpcentiemenGemeente }))
@@ -129,6 +143,13 @@ export default function FacturatieClient({ contracts, btwCodes, initialId }) {
   const saveContract = async () => {
     const ok = await run(`/api/contracts/${contract.id}`, json('PATCH', form))
     if (ok) router.refresh()
+  }
+  const createTaxInvoice = async () => {
+    const ok = await run('/api/invoices', json('POST', { type: 'belasting', contractId: contract.id, taxType, taxYear, ...tax }))
+    if (ok) {
+      setTax((t) => ({ ...t, amount: '', reference: '' }))
+      await loadInvoices()
+    }
   }
   const createInvoice = async () => {
     if (await run('/api/invoices', json('POST', { contractId: contract.id, year, index: period.index }))) await loadInvoices()
@@ -209,7 +230,7 @@ export default function FacturatieClient({ contracts, btwCodes, initialId }) {
           </Card>
 
           {isBE && (
-            <Card title="Onroerende voorheffing (Vlaanderen, volledig doorbelast)">
+            <Card title="Grondslag onroerende voorheffing (Vlaanderen)">
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Kadastraal inkomen, niet geïndexeerd (€)">
                   <input type="number" step="1" min="0" value={form.kadastraalInkomen} onChange={set('kadastraalInkomen')} className={inputClass} />
@@ -234,26 +255,38 @@ export default function FacturatieClient({ contracts, btwCodes, initialId }) {
                   <input type="number" step="0.01" min="0" value={form.ovOpcentiemenProvincie} onChange={set('ovOpcentiemenProvincie')} className={inputClass} />
                 </Field>
               </div>
-              {preview.ov ? (
+              {ov ? (
                 <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 space-y-1">
-                  <Row label={`Geïndexeerd KI (× ${preview.ov.coefficient.toLocaleString('nl-NL', { minimumFractionDigits: 4 })})`} value={eur(preview.ov.geindexeerdKI)} />
-                  <Row label={`Basisheffing Vlaams Gewest (${(BASISTARIEF * 100).toLocaleString('nl-NL')}%)`} value={eur(preview.ov.basisheffing)} />
-                  <Row label="Opcentiemen provincie" value={eur(preview.ov.provincie)} />
-                  <Row label="Opcentiemen gemeente" value={eur(preview.ov.gemeente)} />
-                  <Row label={`Onroerende voorheffing ${year} (indicatief)`} value={eur(preview.ov.totaal)} strong />
+                  <Row label={`Geïndexeerd KI ${taxYear} (× ${ov.coefficient.toLocaleString('nl-NL', { minimumFractionDigits: 4 })})`} value={eur(ov.geindexeerdKI)} />
+                  <Row label={`Basisheffing Vlaams Gewest (${(BASISTARIEF * 100).toLocaleString('nl-NL')}%)`} value={eur(ov.basisheffing)} />
+                  <Row label="Opcentiemen provincie" value={eur(ov.provincie)} />
+                  <Row label="Opcentiemen gemeente" value={eur(ov.gemeente)} />
+                  <Row label={`Berekend voor ${taxYear} (indicatief)`} value={eur(ov.totaal)} strong />
                 </div>
               ) : (
                 <p className="text-xs text-gray-500">Vul een kadastraal inkomen in om de voorheffing te berekenen.</p>
               )}
-              {!heeftCoefficient(year) && (
-                <p className="text-xs text-amber-700">De coëfficiënt voor {year} is nog niet gepubliceerd; de laatst bekende wordt gebruikt.</p>
-              )}
               <p className="text-xs text-gray-500">
-                Opcentiemen {opcentiemen.jaar} uit het overzicht van de Vlaamse overheid. Zonder verminderingen en verlaagde tarieven.{' '}
+                Opcentiemen {opcentiemen.jaar} uit het overzicht van de Vlaamse overheid, ook voor oudere aanslagjaren: controleer die tegen de aanslag. Zonder verminderingen en verlaagde tarieven.{' '}
                 <a href={SIMULATOR_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-blue-600 hover:underline">
                   Controleer in de officiële simulator <ExternalLink className="w-3 h-3" />
                 </a>
               </p>
+            </Card>
+          )}
+
+          {!isBE && (
+            <Card title="Grondslag OZB (Nederland)">
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="WOZ-waarde (€)">
+                  <input type="number" step="1000" min="0" value={form.wozWaarde} onChange={set('wozWaarde')} className={inputClass} />
+                </Field>
+                <Field label="OZB-tarief (% van de WOZ-waarde)">
+                  <input type="number" step="0.0001" min="0" value={form.ozbTarief} onChange={set('ozbTarief')} className={inputClass} />
+                </Field>
+              </div>
+              {berekend != null && <Row label="Berekend (indicatief)" value={eur(berekend)} strong />}
+              <p className="text-xs text-gray-500">Voorbeeldwaarden om mee te rekenen; het bedrag op de aanslag is leidend.</p>
             </Card>
           )}
 
@@ -270,7 +303,7 @@ export default function FacturatieClient({ contracts, btwCodes, initialId }) {
         </div>
 
         <div className="space-y-5">
-          <Card title="Factuur">
+          <Card title="Contractfactuur">
             <div className="grid grid-cols-2 gap-3">
               <Field label="Jaar">
                 <select value={year} onChange={(e) => setYear(Number(e.target.value))} className={inputClass}>
@@ -332,7 +365,68 @@ export default function FacturatieClient({ contracts, btwCodes, initialId }) {
             {blocked && !preview.error && <p className="text-xs text-gray-500">{blocked}.</p>}
           </Card>
 
-          <Card title={`Vergelijking per frequentie, ${year}, inclusief BTW`}>
+          <Card title={`Belastingaanslag ontvangen: ${BELASTINGEN[taxType].label}`}>
+            <p className="text-xs text-gray-500">
+              Aparte factuur zodra de aanslag van de overheid binnen is, volledig doorbelast aan de klant. Ook voor oudere aanslagjaren.
+            </p>
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+              {AANSLAGJAREN.filter((y) => contractLiepIn(merged, y)).map((y) => {
+                const invoice = taxInvoiceFor(y)
+                return (
+                  <li key={y}>
+                    <button type="button" onClick={() => setTaxYear(y)} className={`w-full flex justify-between gap-2 px-2 py-1 rounded-md hover:bg-gray-50 ${y === taxYear ? 'bg-blue-50' : ''}`}>
+                      <span className="font-medium text-gray-700">{y}</span>
+                      <span className={invoice ? 'text-green-700' : 'text-gray-400'}>{invoice ? `${eur(invoice.subtotal)} doorbelast` : 'Geen aanslag verwerkt'}</span>
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Aanslagjaar">
+                <select value={taxYear} onChange={(e) => setTaxYear(Number(e.target.value))} className={inputClass}>
+                  {AANSLAGJAREN.map((y) => <option key={y}>{y}</option>)}
+                </select>
+              </Field>
+              <Field label="Aanslag ontvangen op">
+                <input type="date" value={tax.receivedAt} onChange={(e) => setTax((t) => ({ ...t, receivedAt: e.target.value }))} className={inputClass} />
+              </Field>
+              <Field label="Bedrag op de aanslag (€)">
+                <input type="number" step="0.01" min="0" value={tax.amount} onChange={(e) => setTax((t) => ({ ...t, amount: e.target.value }))} className={inputClass} />
+              </Field>
+              <Field label="Aanslagnummer (optioneel)">
+                <input type="text" value={tax.reference} onChange={(e) => setTax((t) => ({ ...t, reference: e.target.value }))} className={inputClass} />
+              </Field>
+            </div>
+            {berekend != null && (
+              <div className="flex items-center justify-between gap-2 text-xs text-gray-500">
+                <span>
+                  Berekend: {eur(berekend)}
+                  {verschil != null && Math.abs(verschil) >= 0.01 && <span className="text-amber-700"> · verschil met aanslag {eur(verschil)}</span>}
+                </span>
+                <button type="button" onClick={() => setTax((t) => ({ ...t, amount: berekend }))} className="text-blue-600 hover:underline">Overnemen</button>
+              </div>
+            )}
+            {!taxPreview.error && (
+              <div className="space-y-1">
+                <Row label="Doorbelast" value={eur(taxPreview.subtotal)} />
+                <Row label={`BTW (${btwPercentage ?? 0}%)`} value={eur(taxPreview.vatAmount)} />
+                <Row label="Totaal factuur" value={eur(taxPreview.total)} strong />
+              </div>
+            )}
+            {tax.amount !== '' && taxPreview.error && <p className="text-xs text-amber-700">{taxPreview.error}.</p>}
+            {taxInvoiceFor(taxYear) && <p className="text-xs text-amber-700">Aanslagjaar {taxYear} is al doorbelast.</p>}
+            <button
+              onClick={createTaxInvoice}
+              disabled={Boolean(taxPreview.error) || Boolean(taxInvoiceFor(taxYear)) || contract.status === 'draft' || busy}
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            >
+              <FileText className="w-4 h-4" />
+              Belastingfactuur aanmaken voor {taxYear}
+            </button>
+          </Card>
+
+          <Card title={`Vergelijking contractfactuur per frequentie, ${year}, inclusief BTW`}>
             <div className="space-y-1">
               {compare.map((c) => (
                 <div key={c.f} className="flex items-center gap-2 text-sm text-gray-600">

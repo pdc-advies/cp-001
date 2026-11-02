@@ -44,17 +44,26 @@ model Contract {
   ovProvincie             String? @map("ov_provincie")
   ovOpcentiemenGemeente   Float?  @map("ov_opcentiemen_gemeente")
   ovOpcentiemenProvincie  Float?  @map("ov_opcentiemen_provincie")
+  // OZB (Nederland): voorbeeldberekening om een ontvangen aanslag mee te controleren
+  wozWaarde               Float?  @map("woz_waarde")
+  ozbTarief               Float?  @map("ozb_tarief")
   contractNotes  ContractNote[]
   invoices       Invoice[]
 
   @@map("contracts")
 }
 
-// Facturen uit het contract (demo): aangemaakt in CP-001, verzonden naar en geboekt in de Unit4-simulatie
+// Facturen (demo): aangemaakt in CP-001, verzonden naar en geboekt in de Unit4-simulatie.
+// type 'contract' volgt de frequentie; type 'belasting' volgt een ontvangen aanslag (OV of OZB) van een aanslagjaar.
 model Invoice {
   id             Int       @id @default(autoincrement())
   contractId     Int       @map("contract_id")
   contract       Contract  @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  type           String    @default("contract")
+  taxType        String?   @map("tax_type")
+  taxYear        Int?      @map("tax_year")
+  taxReceivedAt  DateTime? @db.Date @map("tax_received_at")
+  taxReference   String?   @map("tax_reference")
   contractNumber String    @map("contract_number")
   debiteurnummer String?
   customerName   String    @map("customer_name")

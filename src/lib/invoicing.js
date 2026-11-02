@@ -1,13 +1,16 @@
-// Factuur uit de contractgegevens: oppervlakte × prijs per m², of de vaste jaarprijs, verdeeld over de perioden
-// van de frequentie. De onroerende voorheffing wordt volledig doorbelast. Zowel de voorbeeldfactuur in het scherm
-// als de opgeslagen factuur gebruiken deze berekening.
-import { berekenOV } from '@/lib/onroerendeVoorheffing'
-
+// Twee soorten facturen, beide gebruikt voor de voorbeeldfactuur in het scherm én de opgeslagen factuur:
+// - contractfactuur: oppervlakte × prijs per m², of de vaste jaarprijs, verdeeld over de perioden van de frequentie
+// - belastingfactuur: een ontvangen aanslag (OV in België, OZB in Nederland) wordt per aanslagjaar volledig doorbelast
 export const FREQUENTIES = { Maand: 12, Kwartaal: 4, Jaar: 1 }
 const MAANDEN = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december']
 
 // Voorbeeldrekeningen voor de simulatie
-export const REKENINGEN = { debiteuren: '13000', btw: '15000', omzet: '82000', ov: '82500' }
+export const REKENINGEN = { debiteuren: '13000', btw: '15000', omzet: '82000', belasting: '82500' }
+
+export const BELASTINGEN = {
+  OV: { label: 'Onroerende voorheffing', land: 'BE' },
+  OZB: { label: 'Onroerendezaakbelasting', land: 'NL' },
+}
 
 const round2 = (v) => Math.round((v + Number.EPSILON) * 100) / 100
 const DAG_MS = 24 * 60 * 60 * 1000
@@ -21,6 +24,11 @@ export function annualPrice(c) {
   if (c.fixedPrice) return contractValue == null ? null : Number(contractValue)
   if (c.m2 !== '' && c.m2 != null && c.pricePerM2 !== '' && c.pricePerM2 != null) return round2(Number(c.m2) * Number(c.pricePerM2))
   return contractValue == null ? null : Number(contractValue)
+}
+
+export function berekenOZB({ wozWaarde, ozbTarief }) {
+  if (wozWaarde === '' || wozWaarde == null || ozbTarief === '' || ozbTarief == null) return null
+  return round2((Number(wozWaarde) * Number(ozbTarief)) / 100)
 }
 
 export function periodsFor(frequency, year) {
@@ -70,19 +78,11 @@ export function buildInvoice(c, period, btwPercentage) {
   const berekening = c.fixedPrice ? 'vaste jaarprijs' : `${getal(c.m2)} m² × ${eur(Number(c.pricePerM2))} per m²`
   const lines = [regel('CONTRACT', `${c.contractType || 'Contract'} ${period.label}: ${berekening}`, c.grootboekNieuw || REKENINGEN.omzet, jaarprijs)]
 
-  const ov = berekenOV({
-    kadastraalInkomen: c.kadastraalInkomen,
-    jaar: period.year,
-    opcentiemenGemeente: c.ovOpcentiemenGemeente,
-    opcentiemenProvincie: c.ovOpcentiemenProvincie,
-  })
-  if (ov) lines.push(regel('OV', `Onroerende voorheffing ${period.year}, doorbelast (${period.label})`, REKENINGEN.ov, ov.totaal))
 
   const subtotal = round2(lines.reduce((s, l) => s + l.bedrag, 0))
   const vatAmount = round2(lines.reduce((s, l) => s + l.btw, 0))
   return {
     lines,
-    ov,
     jaarprijs,
     factor,
     referentie: referentie(c, period),
@@ -90,6 +90,34 @@ export function buildInvoice(c, period, btwPercentage) {
     vatAmount,
     total: round2(subtotal + vatAmount),
   }
+}
+
+// Liep het contract in dit aanslagjaar? Ook een beëindigd contract krijgt een late aanslag nog doorbelast.
+export function contractLiepIn(c, jaar) {
+  const start = c.invoiceStartDate || c.startDate
+  const end = c.invoiceEndDate || c.endDate
+  return (!start || Number(start.slice(0, 4)) <= jaar) && (!end || Number(end.slice(0, 4)) >= jaar)
+}
+
+// Factuur voor één ontvangen aanslag: het volledige bedrag, in één keer
+export function buildTaxInvoice(c, { taxType, year, amount }, btwPercentage) {
+  const belasting = BELASTINGEN[taxType]
+  if (!belasting) return { error: 'Onbekende belasting' }
+  const bedrag = round2(Number(amount))
+  if (!(bedrag > 0)) return { error: 'Vul het bedrag van de aanslag in' }
+  if (!contractLiepIn(c, year)) return { error: `Het contract liep niet in ${year}` }
+
+  const btwPct = Number(btwPercentage) || 0
+  const lines = [{
+    code: taxType,
+    omschrijving: `${belasting.label} aanslagjaar ${year}, doorbelast`,
+    grootboek: REKENINGEN.belasting,
+    jaarbedrag: bedrag,
+    bedrag,
+    btwPct,
+    btw: round2((bedrag * btwPct) / 100),
+  }]
+  return { lines, label: `${belasting.label} ${year}`, subtotal: bedrag, vatAmount: lines[0].btw, total: round2(bedrag + lines[0].btw) }
 }
 
 // Journaalpost zoals de financiële administratie die boekt

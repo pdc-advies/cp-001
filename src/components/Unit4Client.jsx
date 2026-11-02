@@ -93,6 +93,7 @@ export default function Unit4Client() {
                 <div>
                   <h2 className="text-sm font-semibold text-gray-800">{selected.contractNumber} · {selected.periodLabel}</h2>
                   <p className="text-xs text-gray-500">
+                    {selected.type === 'belasting' && `Aanslag ontvangen ${fmtDate(selected.taxReceivedAt)}${selected.taxReference ? ` (${selected.taxReference})` : ''} · `}
                     Ontvangen {fmtDate(selected.sentAt)}{selected.bookedAt && ` · geboekt ${fmtDate(selected.bookedAt)} door ${selected.bookedBy}`}
                   </p>
                 </div>
