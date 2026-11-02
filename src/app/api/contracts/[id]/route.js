@@ -46,15 +46,29 @@ export async function PUT(request, { params }) {
   }
 }
 
-// Gedeeltelijke update vanuit de kaart: alleen deze velden, de rest blijft ongemoeid
+const num = (v) => (v === '' || v == null ? null : Number(v))
+
+// Gedeeltelijke update vanuit de kaart en facturatie: alleen deze velden, de rest blijft ongemoeid
 const PATCH_FIELDS = {
   status: (v) => v || 'draft',
   contractType: (v) => v || null,
   startDate: (v) => new Date(v),
   endDate: (v) => (v ? new Date(v) : null),
-  m2: (v) => (v === '' || v == null ? null : Number(v)),
+  m2: num,
   kadastrale: (v) => v || null,
   description: (v) => v || null,
+  pricePerM2: num,
+  contractValue: num,
+  fixedPrice: Boolean,
+  invoiceFrequency: (v) => v || null,
+  btwCode: (v) => v || null,
+  kadastraalInkomen: num,
+  ovGemeente: (v) => v || null,
+  ovProvincie: (v) => v || null,
+  ovOpcentiemenGemeente: num,
+  ovOpcentiemenProvincie: num,
+  wozWaarde: num,
+  ozbTarief: num,
 }
 
 export async function PATCH(request, { params }) {
@@ -68,8 +82,10 @@ export async function PATCH(request, { params }) {
     if ('startDate' in data && isNaN(data.startDate)) {
       return NextResponse.json({ error: 'Startdatum is verplicht' }, { status: 400 })
     }
-    if ('m2' in data && data.m2 != null && isNaN(data.m2)) {
-      return NextResponse.json({ error: 'm² moet een getal zijn' }, { status: 400 })
+    for (const [field, value] of Object.entries(data)) {
+      if (typeof value === 'number' && isNaN(value)) {
+        return NextResponse.json({ error: `${field} moet een getal zijn` }, { status: 400 })
+      }
     }
     const contract = await prisma.contract.update({ where: { id }, data })
     return NextResponse.json(contract)

@@ -45,18 +45,60 @@ const NOTES = [
   { contractNumber: 'DEMO-BE-01', text: 'Jaarlijkse indexatie besproken met de klant, akkoord.', team: null },
 ]
 
+// Facturatievelden: wisselende frequenties en, voor België, een verzonnen KI met de tarieven van Leuven 2026
+// (1170 = percelen met een economische aard). Ook voor een al gevulde demodatabase.
+const OV_LEUVEN = { ovGemeente: 'Leuven (gedifferentieerd 1170)', ovProvincie: 'Vlaams-Brabant', ovOpcentiemenGemeente: 1170, ovOpcentiemenProvincie: 171.75 }
+const BILLING = {
+  'DEMO-NL-01': { invoiceFrequency: 'Jaar' },
+  'DEMO-NL-02': { invoiceFrequency: 'Maand' },
+  'DEMO-BE-01': { invoiceFrequency: 'Kwartaal', kadastraalInkomen: 18500, ...OV_LEUVEN },
+  'DEMO-BE-02': { invoiceFrequency: 'Maand', kadastraalInkomen: 6200, ...OV_LEUVEN },
+  'DEMO-BE-03': { invoiceFrequency: 'Kwartaal', kadastraalInkomen: 9400, ...OV_LEUVEN },
+  'DEMO-BE-04': { invoiceFrequency: 'Jaar', kadastraalInkomen: 14800, ...OV_LEUVEN },
+  'DEMO-BE-05': { invoiceFrequency: 'Kwartaal', kadastraalInkomen: 5300, ...OV_LEUVEN },
+}
+
+// Voorbeeldwaarden voor de OZB-berekening; verzonnen, niet de echte WOZ-waarde of het echte tarief
+const OZB = { 'DEMO-NL-01': 620000, 'DEMO-NL-02': 1450000, 'DEMO-NL-03': 3900000, 'DEMO-NL-04': 980000, 'DEMO-NL-05': 1200000 }
+
+async function applyOzb() {
+  for (const [contractNumber, wozWaarde] of Object.entries(OZB)) {
+    await prisma.contract.updateMany({ where: { contractNumber }, data: { wozWaarde, ozbTarief: 0.45 } })
+  }
+}
+
+async function applyBilling() {
+  for (const [contractNumber, data] of Object.entries(BILLING)) {
+    await prisma.contract.updateMany({ where: { contractNumber }, data })
+  }
+}
+
 const day = (s) => (s ? new Date(`${s}T00:00:00Z`) : null)
 
 async function main() {
   const count = await prisma.contract.count()
   if (process.argv.includes('--reset')) {
     if (count > 50) throw new Error(`Database heeft ${count} contracten: dit is geen demodatabase, --reset geweigerd`)
+    await prisma.invoice.deleteMany()
     await prisma.contractNote.deleteMany()
     await prisma.contract.deleteMany()
     await prisma.customer.deleteMany()
     await prisma.btwCode.deleteMany()
   } else if (count > 0) {
-    console.log(`seed-demo: database bevat al ${count} contracten, niets gedaan`)
+    // Eenmalig bijwerken zodra deze velden erbij komen; latere wijzigingen in de demo blijven staan
+    const billed = await prisma.contract.count({ where: { kadastraalInkomen: { not: null } } })
+    const demoData = await prisma.contract.count({ where: { contractNumber: 'DEMO-BE-01' } })
+    if (demoData && !billed) {
+      await applyBilling()
+      console.log('seed-demo: facturatievelden toegevoegd')
+    }
+    if (demoData && !(await prisma.contract.count({ where: { wozWaarde: { not: null } } }))) {
+      await applyOzb()
+      console.log('seed-demo: OZB-velden toegevoegd')
+    }
+    // Belasting staat niet meer op de contractfactuur; oude voorbeeldfacturen die dat nog deden vervallen
+    const { count: removed } = await prisma.invoice.deleteMany({ where: { type: 'contract', lines: { array_contains: [{ code: 'OV' }] } } })
+    if (removed) console.log(`seed-demo: ${removed} oude factuur/facturen met voorheffing verwijderd`)
     return
   }
 
@@ -70,6 +112,8 @@ async function main() {
     })
     idByNumber[c.contractNumber] = created.id
   }
+  await applyBilling()
+  await applyOzb()
   for (const n of NOTES) {
     await prisma.contractNote.create({ data: { contractId: idByNumber[n.contractNumber], text: n.text, team: n.team, author: 'Demo' } })
   }

@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import ContractEditForm from '@/components/ContractEditForm'
+import { isDemo } from '@/lib/demo'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,5 +34,5 @@ export default async function ContractEditPage({ params, searchParams }) {
     updatedAt: contract.updatedAt.toISOString(),
   }
 
-  return <ContractEditForm contract={serialized} customers={customers} btwCodes={btwCodes} returnTo={returnTo} />
+  return <ContractEditForm contract={serialized} customers={customers} btwCodes={btwCodes} returnTo={returnTo} demo={isDemo()} />
 }
