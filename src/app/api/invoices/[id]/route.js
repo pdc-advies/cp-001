@@ -16,8 +16,9 @@ export async function PATCH(request, { params }) {
     if (action === 'send' && invoice.status === 'aangemaakt') {
       data = { status: 'verzonden', sentAt: new Date() }
     } else if (action === 'book' && invoice.status === 'verzonden') {
-      const number = `U4-${invoice.periodStart.getUTCFullYear()}-${String(invoice.id).padStart(5, '0')}`
-      data = { status: 'geboekt', bookedAt: new Date(), bookedBy: author(request), unit4Number: number }
+      const bookedAt = new Date()
+      const number = `U4-${bookedAt.getUTCFullYear()}-${String(invoice.id).padStart(5, '0')}`
+      data = { status: 'geboekt', bookedAt, bookedBy: author(request), unit4Number: number }
     } else {
       return NextResponse.json({ error: `Stap '${action}' kan niet bij status '${invoice.status}'` }, { status: 400 })
     }
