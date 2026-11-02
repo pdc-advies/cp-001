@@ -1,5 +1,7 @@
 // Onroerende voorheffing in Vlaanderen, volgens de rekenregels op vlaanderen.be.
 // Indicatief: verminderingen en verlaagde tarieven (sociale woningen, materieel) zitten er niet in.
+import tarieven from '@/lib/opcentiemen.json'
+
 export const BASISTARIEF = 0.0397
 
 // Indexatiecoëfficiënt per aanslagjaar
@@ -9,6 +11,20 @@ const LAATSTE_JAAR = Math.max(...Object.keys(COEFFICIENTEN).map(Number))
 export const coefficient = (jaar) => COEFFICIENTEN[jaar] ?? COEFFICIENTEN[LAATSTE_JAAR]
 
 const round2 = (v) => Math.round((v + Number.EPSILON) * 100) / 100
+
+// Officiële opcentiemen van het aanslagjaar. Een tarief dat op het contract is aangepast blijft gelden, net als het
+// contracttarief bij een fusiegemeente zonder historie (ontbreekt = true).
+export function opcentiemenVoorJaar(c, jaar) {
+  const gemeente = tarieven.gemeenten.find((g) => g.naam === c.ovGemeente)
+  const officieelGemeente = gemeente && Number(c.ovOpcentiemenGemeente) === gemeente.opcentiemen
+  const officieelProvincie = Number(c.ovOpcentiemenProvincie) === tarieven.provincies[c.ovProvincie]
+  const historisch = officieelGemeente ? gemeente.jaren[jaar] : undefined
+  return {
+    gemeente: historisch ?? c.ovOpcentiemenGemeente,
+    provincie: (officieelProvincie ? tarieven.provinciesPerJaar[c.ovProvincie][jaar] : undefined) ?? c.ovOpcentiemenProvincie,
+    ontbreekt: Boolean(officieelGemeente) && historisch === undefined,
+  }
+}
 
 // Geeft alle tussenstappen terug; null als er geen kadastraal inkomen is
 export function berekenOV({ kadastraalInkomen, jaar, opcentiemenGemeente, opcentiemenProvincie }) {

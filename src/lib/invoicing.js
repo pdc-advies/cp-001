@@ -120,12 +120,17 @@ export function buildTaxInvoice(c, { taxType, year, amount }, btwPercentage) {
   return { lines, label: `${belasting.label} ${year}`, subtotal: bedrag, vatAmount: lines[0].btw, total: round2(bedrag + lines[0].btw) }
 }
 
-// Journaalpost zoals de financiële administratie die boekt
+// Creditfactuur: het origineel met tegengestelde bedragen
+export function creditLines(lines) {
+  return lines.map((l) => ({ ...l, omschrijving: `Credit: ${l.omschrijving}`, jaarbedrag: -l.jaarbedrag, bedrag: -l.bedrag, btw: -l.btw }))
+}
+
+// Journaalpost zoals de financiële administratie die boekt; bij een creditfactuur draaien debet en credit om
 export function journalLines(invoice) {
-  const omzet = invoice.lines.map((l) => ({ rekening: l.grootboek, omschrijving: l.omschrijving, debet: null, credit: l.bedrag }))
+  const post = (rekening, omschrijving, debet) => ({ rekening, omschrijving, debet: debet > 0 ? debet : null, credit: debet < 0 ? -debet : null })
   return [
-    { rekening: REKENINGEN.debiteuren, omschrijving: `Debiteur ${invoice.debiteurnummer ?? ''} ${invoice.customerName}`.trim(), debet: invoice.total, credit: null },
-    ...omzet,
-    ...(invoice.vatAmount ? [{ rekening: REKENINGEN.btw, omschrijving: 'Af te dragen BTW', debet: null, credit: invoice.vatAmount }] : []),
+    post(REKENINGEN.debiteuren, `Debiteur ${invoice.debiteurnummer ?? ''} ${invoice.customerName}`.trim(), invoice.total),
+    ...invoice.lines.map((l) => post(l.grootboek, l.omschrijving, -l.bedrag)),
+    ...(invoice.vatAmount ? [post(REKENINGEN.btw, 'Af te dragen BTW', -invoice.vatAmount)] : []),
   ]
 }
