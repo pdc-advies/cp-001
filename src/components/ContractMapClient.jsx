@@ -210,7 +210,7 @@ function Detail({ p, demo, editing, onClose, onEdit, onCancelEdit, onSaved, onFu
         )}
         {p.description && <p className="mt-2 text-xs text-gray-600">{p.description}</p>}
         {demo && (
-          <Link href={`/facturatie?contract=${p.id}`} className="mt-2 inline-flex items-center gap-1.5 text-xs text-blue-600 hover:underline">
+          <Link href={`/contracts/${p.id}#facturatie`} className="mt-2 inline-flex items-center gap-1.5 text-xs text-blue-600 hover:underline">
             <FileText className="w-3.5 h-3.5" />
             Factureren
           </Link>

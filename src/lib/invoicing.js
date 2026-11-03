@@ -7,6 +7,17 @@ const MAANDEN = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli',
 // Voorbeeldrekeningen voor de simulatie
 export const REKENINGEN = { debiteuren: '13000', btw: '15000', omzet: '82000', belasting: '82500' }
 
+export const BETAALTERMIJN_DAGEN = 30
+
+// Afzender op het factuurdocument; verzonnen gegevens voor de demo
+export const AFZENDER = {
+  naam: 'Demo Havenbedrijf BV',
+  adres: ['Voorbeeldkade 1', '4500 AA Demostad'],
+  iban: 'NL00 DEMO 0123 4567 89',
+  btw: 'NL000000000B00',
+  kvk: '00000000',
+}
+
 export const BELASTINGEN = {
   OV: { label: 'Onroerende voorheffing', land: 'BE' },
   OZB: { label: 'Onroerendezaakbelasting', land: 'NL' },

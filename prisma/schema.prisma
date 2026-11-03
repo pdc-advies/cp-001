@@ -67,6 +67,11 @@ model Invoice {
   // Correctie van een geboekte aanslag: creditfactuur (creditOfId) plus nieuwe factuur; het origineel wordt credited
   creditOfId     Int?      @map("credit_of_id")
   credited       Boolean   @default(false)
+  runKey         String?   @map("run_key")
+  customerReference String? @map("customer_reference")
+  invoiceDate    DateTime? @db.Date @map("invoice_date")
+  dueDate        DateTime? @db.Date @map("due_date")
+  paidAt         DateTime? @map("paid_at")
   contractNumber String    @map("contract_number")
   debiteurnummer String?
   customerName   String    @map("customer_name")
@@ -78,6 +83,7 @@ model Invoice {
   subtotal       Float
   vatAmount      Float     @map("vat_amount")
   total          Float
+  // aangemaakt (concept in CP-001) → verzonden (naar Unit4) → geboekt → betaald (beide gemeld door Unit4)
   status         String    @default("aangemaakt")
   createdBy      String    @map("created_by")
   createdAt      DateTime  @default(now()) @map("created_at")
@@ -131,4 +137,39 @@ model Customer {
   updatedAt      DateTime @updatedAt @map("updated_at")
 
   @@map("customers")
+}
+
+// Unit4-simulatie: een apart systeem met eigen gegevens. Kent alleen wat via de koppeling binnenkwam (payload);
+// geen relatie met de tabellen van CP-001, net als in werkelijkheid.
+model Unit4Invoice {
+  id             Int       @id @default(autoincrement())
+  externalId     String    @unique @map("external_id")
+  cp001InvoiceId Int       @map("cp001_invoice_id")
+  number         String?
+  status         String    @default("ontvangen")
+  payload        Json
+  receivedAt     DateTime  @default(now()) @map("received_at")
+  bookedAt       DateTime? @map("booked_at")
+  bookedBy       String?   @map("booked_by")
+  paidAt         DateTime? @map("paid_at")
+  paidBy         String?   @map("paid_by")
+
+  @@map("unit4_sales_invoices")
+}
+
+// Logboek van alle berichten tussen CP-001 en Unit4, in beide richtingen
+model InterfaceMessage {
+  id         Int      @id @default(autoincrement())
+  invoiceId  Int?     @map("invoice_id")
+  direction  String
+  operation  String
+  method     String
+  endpoint   String
+  payload    Json
+  response   Json?
+  httpStatus Int      @map("http_status")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([invoiceId])
+  @@map("interface_messages")
 }
