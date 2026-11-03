@@ -7,11 +7,11 @@ const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
 const CUSTOMERS = [
-  { debiteurnummer: '900101', name: 'Zeeuwse Opslag BV (demo)', city: 'Terneuzen' },
-  { debiteurnummer: '900102', name: 'Kanaalzone Logistiek BV (demo)', city: 'Terneuzen' },
-  { debiteurnummer: '900103', name: 'Scheldewerf Holding NV (demo)', city: 'Vlissingen' },
-  { debiteurnummer: '900201', name: 'Haasrode Tech Campus NV (demo)', city: 'Leuven' },
-  { debiteurnummer: '900202', name: 'Brabant Distributie BVBA (demo)', city: 'Leuven' },
+  { debiteurnummer: '900101', name: 'Zeeuwse Opslag BV (demo)', address: 'Kanaalweg 10', city: '4530 AA Terneuzen' },
+  { debiteurnummer: '900102', name: 'Kanaalzone Logistiek BV (demo)', address: 'Havenstraat 22', city: '4530 AB Terneuzen' },
+  { debiteurnummer: '900103', name: 'Scheldewerf Holding NV (demo)', address: 'Werfkade 3', city: '4380 AC Vlissingen' },
+  { debiteurnummer: '900201', name: 'Haasrode Tech Campus NV (demo)', address: 'Researchpark 1', city: '3001 Leuven' },
+  { debiteurnummer: '900202', name: 'Brabant Distributie BVBA (demo)', address: 'Logistiekweg 7', city: '3001 Leuven' },
 ]
 
 const BTW_CODES = [
@@ -79,6 +79,8 @@ async function main() {
   const count = await prisma.contract.count()
   if (process.argv.includes('--reset')) {
     if (count > 50) throw new Error(`Database heeft ${count} contracten: dit is geen demodatabase, --reset geweigerd`)
+    await prisma.interfaceMessage.deleteMany()
+    await prisma.unit4Invoice.deleteMany()
     await prisma.invoice.deleteMany()
     await prisma.contractNote.deleteMany()
     await prisma.contract.deleteMany()
@@ -95,6 +97,17 @@ async function main() {
     if (demoData && !(await prisma.contract.count({ where: { wozWaarde: { not: null } } }))) {
       await applyOzb()
       console.log('seed-demo: OZB-velden toegevoegd')
+    }
+    // Adressen voor het factuurdocument
+    for (const c of CUSTOMERS) {
+      await prisma.customer.updateMany({ where: { debiteurnummer: c.debiteurnummer, address: null }, data: { address: c.address, city: c.city } })
+    }
+    // Facturen van vóór de koppeling (verzonden of geboekt zonder factuurdatum) hebben geen tegenhanger in Unit4: opruimen
+    const oud = await prisma.invoice.count({ where: { status: { in: ['verzonden', 'geboekt'] }, invoiceDate: null } })
+    if (oud) {
+      const { count: weg } = await prisma.invoice.deleteMany({ where: { status: { not: 'aangemaakt' } } })
+      await prisma.invoice.updateMany({ where: { credited: true }, data: { credited: false } })
+      console.log(`seed-demo: ${weg} facturen van vóór de koppeling verwijderd`)
     }
     // Belasting staat niet meer op de contractfactuur; oude voorbeeldfacturen die dat nog deden vervallen
     const { count: removed } = await prisma.invoice.deleteMany({ where: { type: 'contract', lines: { array_contains: [{ code: 'OV' }] } } })

@@ -34,7 +34,14 @@ export async function PUT(request, { params }) {
         invoiceRef: body.invoiceRef ?? null,
         fixedPrice: body.fixedPrice ?? false,
         status: body.status || 'draft',
-        notes: body.notes ?? null
+        notes: body.notes ?? null,
+        kadastraalInkomen: num(body.kadastraalInkomen),
+        ovGemeente: body.ovGemeente || null,
+        ovProvincie: body.ovProvincie || null,
+        ovOpcentiemenGemeente: num(body.ovOpcentiemenGemeente),
+        ovOpcentiemenProvincie: num(body.ovOpcentiemenProvincie),
+        wozWaarde: num(body.wozWaarde),
+        ozbTarief: num(body.ozbTarief),
       }
     })
     return NextResponse.json(contract)

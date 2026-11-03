@@ -10,8 +10,8 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="nl">
-      <body className="bg-gray-50 min-h-screen">
-        <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+      <body className="bg-gray-50 min-h-screen print:bg-white">
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-40 print:hidden">
           <div className="max-w-7xl mx-auto px-6 h-14 flex items-center">
             <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 bg-blue-600 rounded-md flex items-center justify-center">
@@ -24,7 +24,7 @@ export default function RootLayout({ children }) {
             <Nav demo={isDemo()} />
           </div>
         </header>
-        <main className="max-w-7xl mx-auto px-6 py-8">
+        <main className="max-w-7xl mx-auto px-6 py-8 print:p-0">
           {children}
         </main>
       </body>

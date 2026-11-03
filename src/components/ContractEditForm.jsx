@@ -4,6 +4,9 @@ import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Save, Map as MapIcon, FileText } from 'lucide-react'
 import ContractNotes from './ContractNotes'
+import ContractBilling from './ContractBilling'
+import { parseKadastrale } from '@/lib/kadastrale'
+import opcentiemen from '@/lib/opcentiemen.json'
 
 const inputClass = 'w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
 const labelClass = 'block text-xs font-medium text-gray-500 mb-1'
@@ -61,6 +64,13 @@ export default function ContractEditForm({ contract, customers, btwCodes = [], r
     btwCode: contract.btwCode ?? '',
     invoiceRef: contract.invoiceRef ?? '',
     notes: contract.notes ?? '',
+    kadastraalInkomen: contract.kadastraalInkomen ?? '',
+    ovGemeente: contract.ovGemeente ?? '',
+    ovProvincie: contract.ovProvincie ?? '',
+    ovOpcentiemenGemeente: contract.ovOpcentiemenGemeente ?? '',
+    ovOpcentiemenProvincie: contract.ovOpcentiemenProvincie ?? '',
+    wozWaarde: contract.wozWaarde ?? '',
+    ozbTarief: contract.ozbTarief ?? '',
   })
 
   const [saving, setSaving] = useState(false)
@@ -165,7 +175,7 @@ export default function ContractEditForm({ contract, customers, btwCodes = [], r
           {demo && (
             <button
               type="button"
-              onClick={() => router.push(`/facturatie?contract=${contract.id}`)}
+              onClick={() => document.getElementById('facturatie')?.scrollIntoView({ behavior: 'smooth' })}
               className="inline-flex items-center gap-2 px-4 py-2 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100"
             >
               <FileText className="w-4 h-4" />
@@ -369,6 +379,60 @@ export default function ContractEditForm({ contract, customers, btwCodes = [], r
           </Field>
         </Section>
 
+        {/* Belastinggrondslag: voor de controle van ontvangen aanslagen (demo) */}
+        {demo && (
+          parseKadastrale(form.kadastrale).some(p => p.land === 'BE') || form.kadastraalInkomen !== '' ? (
+            <Section title="Grondslag onroerende voorheffing (België)">
+              <div className="grid grid-cols-3 gap-4">
+                <Field label="Kadastraal inkomen, niet geïndexeerd (€)">
+                  <input type="number" step="1" min="0" value={form.kadastraalInkomen} onChange={set('kadastraalInkomen')} className={inputClass} />
+                </Field>
+                <Field label="Gemeente">
+                  <select
+                    value={form.ovGemeente}
+                    onChange={e => {
+                      const g = opcentiemen.gemeenten.find(x => x.naam === e.target.value)
+                      setForm(p => ({ ...p, ovGemeente: e.target.value, ovOpcentiemenGemeente: g?.opcentiemen ?? p.ovOpcentiemenGemeente }))
+                    }}
+                    className={inputClass}
+                  >
+                    <option value="">Kies…</option>
+                    {opcentiemen.gemeenten.map(g => <option key={g.naam}>{g.naam}</option>)}
+                  </select>
+                </Field>
+                <Field label="Provincie">
+                  <select
+                    value={form.ovProvincie}
+                    onChange={e => setForm(p => ({ ...p, ovProvincie: e.target.value, ovOpcentiemenProvincie: opcentiemen.provincies[e.target.value] ?? p.ovOpcentiemenProvincie }))}
+                    className={inputClass}
+                  >
+                    <option value="">Kies…</option>
+                    {Object.keys(opcentiemen.provincies).map(p => <option key={p}>{p}</option>)}
+                  </select>
+                </Field>
+                <div />
+                <Field label="Opcentiemen gemeente">
+                  <input type="number" step="0.01" min="0" value={form.ovOpcentiemenGemeente} onChange={set('ovOpcentiemenGemeente')} className={inputClass} />
+                </Field>
+                <Field label="Opcentiemen provincie">
+                  <input type="number" step="0.01" min="0" value={form.ovOpcentiemenProvincie} onChange={set('ovOpcentiemenProvincie')} className={inputClass} />
+                </Field>
+              </div>
+            </Section>
+          ) : (
+            <Section title="Grondslag OZB (Nederland)">
+              <div className="grid grid-cols-3 gap-4">
+                <Field label="WOZ-waarde (€)">
+                  <input type="number" step="1000" min="0" value={form.wozWaarde} onChange={set('wozWaarde')} className={inputClass} />
+                </Field>
+                <Field label="OZB-tarief (% van de WOZ-waarde)">
+                  <input type="number" step="0.0001" min="0" value={form.ozbTarief} onChange={set('ozbTarief')} className={inputClass} />
+                </Field>
+              </div>
+            </Section>
+          )
+        )}
+
         {/* Notities */}
         <Section title="Notities">
           <p className="text-xs text-gray-400 -mt-2">Een notitie wordt direct opgeslagen, met datum, tijd en je inlognaam.</p>
@@ -380,6 +444,12 @@ export default function ContractEditForm({ contract, customers, btwCodes = [], r
           )}
         </Section>
       </form>
+
+      {demo && (
+        <div className="mt-8">
+          <ContractBilling contract={contract} btwCodes={btwCodes} />
+        </div>
+      )}
     </div>
   )
 }
