@@ -67,7 +67,7 @@ export default function Unit4Client() {
           <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-400 text-slate-900">Simulatie</span>
         </div>
         <p className="text-sm text-slate-300 mt-1">
-          De financiële applicatie. Kent alleen wat CP-001 via de koppeling stuurt, kent het factuurnummer toe bij boeking en meldt boeking en betaling terug.
+          De financiële applicatie. Kent alleen wat het Contractenportaal via de koppeling stuurt, kent het factuurnummer toe bij boeking en meldt boeking en betaling terug.
           {records && ` ${open} te boeken.`}
         </p>
       </div>

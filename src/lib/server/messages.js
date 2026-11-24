@@ -5,7 +5,7 @@ export const ENDPOINTS = {
   statusCallback: '/api/interface/unit4/invoice-status',
 }
 
-export const RICHTING = { naarUnit4: 'CP-001 → Unit4', naarCp001: 'Unit4 → CP-001' }
+export const RICHTING = { naarUnit4: 'Contractenportaal → Unit4', naarCp001: 'Unit4 → Contractenportaal' }
 
 export const logMessage = (data) => prisma.interfaceMessage.create({ data })
 

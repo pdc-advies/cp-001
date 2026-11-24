@@ -98,7 +98,7 @@ export default function ContractBilling({ contract, btwCodes }) {
 
   return (
     <section id="facturatie" className="space-y-4 scroll-mt-20">
-      <h2 className="text-lg font-semibold text-gray-900">Facturatie</h2>
+      <h2 className="text-lg font-semibold text-gray-900">Terugvorderen Grondgebonden Heffingen</h2>
       {error && <div className="px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{error}</div>}
 
       <div className="grid lg:grid-cols-2 gap-4 items-start">

@@ -3,7 +3,7 @@ import { isDemo } from '@/lib/demo'
 import Unit4Client from '@/components/Unit4Client'
 
 export const dynamic = 'force-dynamic'
-export const metadata = { title: 'Unit4 (simulatie) · Contract Register' }
+export const metadata = { title: 'Unit4 (simulatie) · Contractenportaal' }
 
 export default function Unit4Page() {
   if (!isDemo()) notFound()

@@ -4,7 +4,7 @@ import { isDemo } from '@/lib/demo'
 import MessageList from '@/components/MessageList'
 
 export const dynamic = 'force-dynamic'
-export const metadata = { title: 'Koppelingen · Contract Register' }
+export const metadata = { title: 'Koppelingen · Contractenportaal' }
 
 export default async function KoppelingenPage() {
   if (!isDemo()) notFound()
@@ -14,7 +14,7 @@ export default async function KoppelingenPage() {
       <div>
         <h1 className="text-xl font-semibold text-gray-900">Koppelingen</h1>
         <p className="text-sm text-gray-500">
-          Alle berichten tussen CP-001 en Unit4. CP-001 stuurt facturen naar <code>POST /api/unit4/sales-invoices</code>; Unit4 meldt boeking en betaling terug op <code>POST /api/interface/unit4/invoice-status</code>.
+          Alle berichten tussen het Contractenportaal en Unit4. Het Contractenportaal stuurt facturen naar <code>POST /api/unit4/sales-invoices</code>; Unit4 meldt boeking en betaling terug op <code>POST /api/interface/unit4/invoice-status</code>.
         </p>
       </div>
       <div className="bg-white rounded-xl border border-gray-200 p-5">
