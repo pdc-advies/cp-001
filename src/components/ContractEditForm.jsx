@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Save, Map as MapIcon, FileText } from 'lucide-react'
 import ContractNotes from './ContractNotes'
+import BtwCodeSelect from './BtwCodeSelect'
 import ContractBilling from './ContractBilling'
 import { parseKadastrale } from '@/lib/kadastrale'
 import opcentiemen from '@/lib/opcentiemen.json'
@@ -301,19 +302,7 @@ export default function ContractEditForm({ contract, customers, btwCodes = [], r
           </div>
           <div className="grid grid-cols-2 gap-4">
             <Field label="BTW code">
-              <input
-                type="text"
-                value={form.btwCode}
-                onChange={set('btwCode')}
-                list="btw-list"
-                placeholder="bijv. 0, V21, vrijgesteld"
-                className={inputClass}
-              />
-              <datalist id="btw-list">
-                {btwCodes.map(b => (
-                  <option key={b.id} value={b.code}>{b.code} — {b.description}{b.percentage != null ? ` (${b.percentage}%)` : ''}</option>
-                ))}
-              </datalist>
+              <BtwCodeSelect value={form.btwCode} onChange={set('btwCode')} codes={btwCodes} className={inputClass} />
             </Field>
             <Field label="Referentie factuur">
               <input type="text" value={form.invoiceRef} onChange={set('invoiceRef')} placeholder="Erfpacht #Ke kwartaal #J" className={inputClass} />

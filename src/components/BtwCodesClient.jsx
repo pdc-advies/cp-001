@@ -1,16 +1,17 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
-import { Plus, Pencil, Trash2, Percent } from 'lucide-react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
+import Link from 'next/link'
+import { Plus, Pencil, Trash2, Percent, AlertTriangle } from 'lucide-react'
 import SmartSearch, { useUrlQuery } from './SmartSearch'
 import { searchRecords } from '@/lib/search'
 import { btwSchema } from '@/lib/searchSchemas'
 
 const inputClass = 'w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
 
-function Modal({ code, onClose, onSave }) {
+function Modal({ code, prefill, onClose, onSave }) {
   const [form, setForm] = useState({
-    code: code?.code ?? '',
+    code: code?.code ?? prefill ?? '',
     description: code?.description ?? '',
     percentage: code?.percentage ?? '',
   })
@@ -71,10 +72,21 @@ function Modal({ code, onClose, onSave }) {
   )
 }
 
-export default function BtwCodesClient({ initialCodes }) {
+export default function BtwCodesClient({ initialCodes, usage = {} }) {
   const [codes, setCodes] = useState(initialCodes)
   const [search, setSearch] = useUrlQuery()
-  const [modal, setModal] = useState({ open: false, code: null })
+  const [modal, setModal] = useState({ open: false, code: null, prefill: null })
+
+  // Vanaf een contract: /btw-codes?nieuw=13 opent het formulier met die code ingevuld
+  useEffect(() => {
+    const nieuw = new URLSearchParams(window.location.search).get('nieuw')
+    if (nieuw && !initialCodes.some(c => c.code === nieuw)) setModal({ open: true, code: null, prefill: nieuw })
+  }, [initialCodes])
+
+  // Codes die op contracten staan maar hier niet bestaan: daarvoor wordt 0% btw gerekend
+  const missing = Object.entries(usage)
+    .filter(([code]) => !codes.some(c => c.code === code))
+    .sort(([a], [b]) => a.localeCompare(b, 'nl', { numeric: true }))
   const [deleting, setDeleting] = useState(null)
 
   const refresh = useCallback(async () => {
@@ -104,6 +116,29 @@ export default function BtwCodesClient({ initialCodes }) {
         </button>
       </div>
 
+      <p className="text-sm text-gray-500 -mt-4 mb-5">
+        Kies de BTW code per contract (contractpagina, onder Boekhoudkundige gegevens). Het percentage wordt gebruikt bij het
+        factureren en de code gaat mee naar Unit4.
+      </p>
+
+      {missing.length > 0 && (
+        <div className="mb-5 px-4 py-3 rounded-xl border border-amber-200 bg-amber-50 text-sm text-amber-900">
+          <p className="flex items-center gap-2 font-medium">
+            <AlertTriangle className="w-4 h-4" />
+            Op contracten staan BTW codes die hier niet bestaan; daarvoor wordt nu 0% btw gerekend.
+          </p>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {missing.map(([code, n]) => (
+              <li key={code} className="inline-flex items-center gap-2 px-2.5 py-1 bg-white rounded-lg border border-amber-200">
+                <span className="font-mono font-semibold">{code}</span>
+                <Link href={`/?q=${encodeURIComponent(`btw:${code}`)}`} className="text-xs text-blue-700 hover:underline">{n} contracten</Link>
+                <button onClick={() => setModal({ open: true, code: null, prefill: code })} className="text-xs font-medium text-amber-800 hover:underline">Toevoegen</button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="flex items-start gap-3 mb-4">
         <SmartSearch
           value={search}
@@ -122,13 +157,14 @@ export default function BtwCodesClient({ initialCodes }) {
               <th className="text-left px-4 py-3 font-medium text-gray-500 w-28">Code</th>
               <th className="text-left px-4 py-3 font-medium text-gray-500">Omschrijving</th>
               <th className="text-right px-4 py-3 font-medium text-gray-500 w-28">Percentage</th>
+              <th className="text-right px-4 py-3 font-medium text-gray-500 w-32">Contracten</th>
               <th className="px-4 py-3 w-20" />
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {shown.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-4 py-10 text-center">
+                <td colSpan={5} className="px-4 py-10 text-center">
                   <Percent className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                   <p className="text-gray-400 text-sm">{codes.length ? 'Geen BTW codes gevonden' : 'Nog geen BTW codes aangemaakt'}</p>
                 </td>
@@ -139,6 +175,11 @@ export default function BtwCodesClient({ initialCodes }) {
                 <td className="px-4 py-3 text-gray-700">{c.description}</td>
                 <td className="px-4 py-3 text-right text-gray-600">
                   {c.percentage != null ? `${c.percentage}%` : '—'}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  {usage[c.code]
+                    ? <Link href={`/?q=${encodeURIComponent(`btw:${c.code}`)}`} className="text-blue-700 hover:underline">{usage[c.code]}</Link>
+                    : <span className="text-gray-400">0</span>}
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-0.5">
@@ -164,8 +205,9 @@ export default function BtwCodesClient({ initialCodes }) {
       {modal.open && (
         <Modal
           code={modal.code}
-          onClose={() => setModal({ open: false, code: null })}
-          onSave={async () => { setModal({ open: false, code: null }); await refresh() }}
+          prefill={modal.prefill}
+          onClose={() => setModal({ open: false, code: null, prefill: null })}
+          onSave={async () => { setModal({ open: false, code: null, prefill: null }); await refresh() }}
         />
       )}
     </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
+import BtwCodeSelect from './BtwCodeSelect'
 
 const EMPTY_FORM = {
   contractNumber: '',
@@ -50,6 +51,11 @@ export default function ContractModal({ contract, onClose, onSave }) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const [btwCodes, setBtwCodes] = useState([])
+
+  useEffect(() => {
+    fetch('/api/btw-codes').then(r => (r.ok ? r.json() : [])).then(setBtwCodes).catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (contract) {
@@ -360,7 +366,7 @@ export default function ContractModal({ contract, onClose, onSave }) {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <Field label="BTW code">
-              <input type="text" value={form.btwCode} onChange={set('btwCode')} placeholder="bijv. 0, V21" className={inputClass} />
+              <BtwCodeSelect value={form.btwCode} onChange={set('btwCode')} codes={btwCodes} className={inputClass} />
             </Field>
             <Field label="Referentie factuur">
               <input type="text" value={form.invoiceRef} onChange={set('invoiceRef')} placeholder="Erfpacht #Ke kwartaal #J" className={inputClass} />

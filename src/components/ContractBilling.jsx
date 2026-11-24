@@ -107,6 +107,9 @@ export default function ContractBilling({ contract, btwCodes }) {
             <Row label="Jaarbedrag" value={jaarprijs == null ? 'Geen prijs' : eur(jaarprijs)} />
             <Row label="Frequentie" value={frequency ?? 'Niet ingesteld'} />
             <Row label="BTW" value={contract.btwCode ? `${contract.btwCode} (${btwPercentage ?? 0}%)` : 'Geen'} />
+            {contract.btwCode && btwPercentage == null && (
+              <p className="text-xs text-amber-700">BTW code “{contract.btwCode}” heeft geen percentage onder BTW Codes; er wordt 0% gerekend.</p>
+            )}
           </div>
           {frequency ? (
             <>

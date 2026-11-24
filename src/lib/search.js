@@ -331,7 +331,8 @@ export function matchRecord(record, parsed, schema) {
       const def = schema.fields?.[f.key]
       if (!def) continue
       const v = normalize(def.get(record))
-      if (f.key === 'land' ? !v.split('+').includes(normalize(f.value)) : !v.includes(normalize(f.value))) return null
+      const want = normalize(f.value)
+      if (f.key === 'land' ? !v.split('+').includes(want) : def.exact ? v !== want : !v.includes(want)) return null
     } else if (f.kind === 'years' && !f.field) {
       if (!schema.inYear) continue
       if (!f.years.some((y) => schema.inYear(record, y))) return null
