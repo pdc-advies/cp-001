@@ -5,13 +5,13 @@ import Map from '@arcgis/core/Map.js'
 import MapView from '@arcgis/core/views/MapView.js'
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer.js'
 import WMSLayer from '@arcgis/core/layers/WMSLayer.js'
-import MapImageLayer from '@arcgis/core/layers/MapImageLayer.js'
 import * as reactiveUtils from '@arcgis/core/core/reactiveUtils.js'
 import '@arcgis/core/assets/esri/themes/light/main.css'
 import { EDIT_ACTION_ID, STATUS_CONFIG, contractFields, contractLabels, contractPopup, statusRenderer, toGraphics } from '@/lib/esriContracts'
 
 const CADASTRAL_WMS = 'https://service.pdok.nl/kadaster/kadastralekaart/wms/v5_0'
-const BE_CADASTRE = 'https://ccff02.minfin.fgov.be/geoservices/arcgis/rest/services/WMS/Cadastral_Layers/MapServer'
+// Digitale Vlaanderen, Actueel Digitaal Percelenplan. De federale CadGIS-dienst (minfin.fgov.be) is niet meer bereikbaar.
+const BE_CADASTRE_WMS = 'https://geo.api.vlaanderen.be/Adpf/wms'
 
 // ArcGIS-kaart met de contracten als FeatureLayer. Alleen client-side laden (next/dynamic, ssr: false).
 export default function ArcgisContractMap({ features, visibleIds, selectedId, onSelect, onEdit }) {
@@ -37,11 +37,11 @@ export default function ArcgisContractMap({ features, visibleIds, selectedId, on
       title: 'Kadastrale kaart NL (PDOK)',
       opacity: 0.7,
     })
-    // Federale kadasterdienst België: perceelgrenzen (11) en gebouwen (12), alleen bij inzoomen
-    const cadastreBE = new MapImageLayer({
-      url: BE_CADASTRE,
-      title: 'Kadastrale percelen BE (FOD Financiën)',
-      sublayers: [{ id: 12, visible: true }, { id: 11, visible: true }],
+    // Vlaamse percelen: grenzen (GrAdpf) en perceelnummers (LblAdpf), alleen bij inzoomen
+    const cadastreBE = new WMSLayer({
+      url: BE_CADASTRE_WMS,
+      title: 'Kadastrale percelen BE (Digitaal Vlaanderen)',
+      sublayers: [{ name: 'GrAdpf' }, { name: 'LblAdpf' }],
       minScale: 6000,
       opacity: 0.7,
     })
