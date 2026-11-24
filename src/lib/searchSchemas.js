@@ -20,7 +20,7 @@ function landVan(c) {
 export const contractSchema = {
   name: 'contracten',
   text: (c) => [
-    c.contractNumber, c.customerName, c.klantNaam, c.debiteurnummer, c.description, c.kostenplaats, c.kadastrale,
+    c.contractNumber, c.btwCode && `btw ${c.btwCode}`, c.customerName, c.klantNaam, c.debiteurnummer, c.description, c.kostenplaats, c.kadastrale,
     c.notes, c.contractType, c.manager, c.invoiceRef, c.ovGemeente, c.grootboekNieuw, c.grootboekOud, STATUS_NL[c.status],
   ],
   defaultAmount: 'jaarprijs',
@@ -62,6 +62,7 @@ export const contractSchema = {
     beheerder: { label: 'Beheerder', get: (c) => c.manager },
     notitie: { label: 'Notitie', get: (c) => c.notes },
     land: { label: 'Land', get: landVan },
+    btw: { label: 'BTW code', exact: true, get: (c) => c.btwCode },
   },
 }
 
