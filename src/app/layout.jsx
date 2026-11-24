@@ -1,5 +1,6 @@
 import './globals.css'
 import Nav from '@/components/Nav'
+import GlobalSearch from '@/components/GlobalSearch'
 import { isDemo } from '@/lib/demo'
 
 export const metadata = {
@@ -22,6 +23,7 @@ export default function RootLayout({ children }) {
               <span className="font-semibold text-gray-900">Contractenportaal</span>
             </div>
             <Nav demo={isDemo()} />
+            <GlobalSearch />
           </div>
         </header>
         <main className="max-w-7xl mx-auto px-6 py-8 print:p-0">

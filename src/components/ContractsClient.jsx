@@ -1,8 +1,11 @@
 'use client'
 
 import { useState, useMemo, useCallback, useRef } from 'react'
-import { Search, Plus, Download, Pencil, Trash2, FileText, Upload, AlertTriangle, ChevronDown, ChevronRight, MapPin } from 'lucide-react'
+import { Plus, Download, Pencil, Trash2, FileText, Upload, AlertTriangle, ChevronDown, ChevronRight, MapPin } from 'lucide-react'
 import ContractModal from './ContractModal'
+import SmartSearch, { useUrlQuery } from './SmartSearch'
+import { searchRecords } from '@/lib/search'
+import { contractSchema } from '@/lib/searchSchemas'
 
 const STATUS_CONFIG = {
   active: {
@@ -54,7 +57,7 @@ function formatCurrency(value) {
 export default function ContractsClient({ initialContracts, initialCustomers = [] }) {
   const [contracts, setContracts] = useState(initialContracts)
   const [customers, setCustomers] = useState(initialCustomers)
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useUrlQuery()
   const [statusFilter, setStatusFilter] = useState('all')
   const [typeFilter, setTypeFilter] = useState('all')
   const [modal, setModal] = useState({ open: false, contract: null }) // new contract only
@@ -80,22 +83,25 @@ export default function ContractsClient({ initialContracts, initialCustomers = [
     return m
   }, [customers])
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase()
-    return contracts.filter(c => {
-      if (q && !(
-        c.contractNumber.toLowerCase().includes(q) ||
-        c.customerName.toLowerCase().includes(q) ||
-        (c.description || '').toLowerCase().includes(q) ||
-        (c.kostenplaats || '').toLowerCase().includes(q) ||
-        (c.kadastrale || '').toLowerCase().includes(q) ||
-        (c.debiteurnummer || '').toLowerCase().includes(q)
-      )) return false
-      if (statusFilter !== 'all' && c.status !== statusFilter) return false
-      if (typeFilter !== 'all' && c.contractType !== typeFilter) return false
-      return true
-    })
-  }, [contracts, search, statusFilter, typeFilter])
+  // Klantnaam via het debiteurnummer meezoeken
+  const searchable = useMemo(
+    () => contracts.map(c => ({ ...c, klantNaam: customerMap[c.debiteurnummer]?.name ?? null, _contract: c })),
+    [contracts, customerMap]
+  )
+
+  // Gevonden waarden per contract (bv. "OV 2024: € 1.234"), getoond onder het contractnummer
+  const { filtered, hitNotes } = useMemo(() => {
+    const notes = {}
+    const list = []
+    for (const { item, notes: n } of searchRecords(searchable, search, contractSchema)) {
+      const c = item._contract
+      if (statusFilter !== 'all' && c.status !== statusFilter) continue
+      if (typeFilter !== 'all' && c.contractType !== typeFilter) continue
+      if (n.length) notes[c.id] = n
+      list.push(c)
+    }
+    return { filtered: list, hitNotes: notes }
+  }, [searchable, search, statusFilter, typeFilter])
 
   const grouped = useMemo(() => {
     const map = {}
@@ -215,17 +221,15 @@ export default function ContractsClient({ initialContracts, initialCustomers = [
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 mb-4">
-        <div className="relative flex-1 min-w-48 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-          <input
-            type="search"
-            placeholder="Zoeken op nummer, klant, omschrijving..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
+      <div className="flex flex-wrap items-start gap-3 mb-4">
+        <SmartSearch
+          value={search}
+          onChange={setSearch}
+          schema={contractSchema}
+          placeholder="Zoek: SCA0001, €1000-5000, ov 2024, actief erfpacht…"
+          resultCount={search ? filtered.length : null}
+          className="flex-1 min-w-64 max-w-md self-start"
+        />
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
@@ -392,6 +396,9 @@ export default function ContractsClient({ initialContracts, initialCustomers = [
                     <tr key={contract.id} className="hover:bg-gray-50 transition-colors border-t border-gray-100">
                       <td className="pl-10 pr-4 py-2.5 font-medium text-gray-800 whitespace-nowrap">
                         {contract.contractNumber}
+                        {hitNotes[contract.id]?.map(n => (
+                          <span key={n} className="block text-xs font-normal text-emerald-700">{n}</span>
+                        ))}
                       </td>
                       <td className="px-4 py-2.5 text-gray-500 whitespace-nowrap text-xs">
                         {contract.contractType || '—'}

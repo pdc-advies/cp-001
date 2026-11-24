@@ -4,7 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Search, Download, MapPin, CircleAlert, CircleDashed, X, Loader2, Pencil, Save, ListTodo, FileText } from 'lucide-react'
+import { Download, MapPin, CircleAlert, CircleDashed, X, Loader2, Pencil, Save, ListTodo, FileText } from 'lucide-react'
+import SmartSearch, { useUrlQuery } from './SmartSearch'
+import { searchRecords } from '@/lib/search'
+import { contractSchema } from '@/lib/searchSchemas'
 import { STATUS_CONFIG } from '@/lib/esriContracts'
 import { TEAMS } from '@/lib/teams'
 import ContractNotes from './ContractNotes'
@@ -227,7 +230,7 @@ export default function ContractMapClient({ demo = false }) {
   const router = useRouter()
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useUrlQuery()
   const [statusFilter, setStatusFilter] = useState('all')
   const [matchFilter, setMatchFilter] = useState('all')
   const [landFilter, setLandFilter] = useState('all')
@@ -254,8 +257,18 @@ export default function ContractMapClient({ demo = false }) {
 
   const features = useMemo(() => data?.features ?? [], [data])
 
+  // Slim zoeken over de contractgegevens; gevonden waarden (bv. "OV 2024: € …") per contract
+  const { searchHits, hitNotes } = useMemo(() => {
+    const notes = {}
+    const ids = new Set()
+    for (const { item, notes: n } of searchRecords(features.map((f) => f.properties), search, contractSchema)) {
+      ids.add(item.id)
+      if (n.length) notes[item.id] = n
+    }
+    return { searchHits: ids, hitNotes: notes }
+  }, [features, search])
+
   const filtered = useMemo(() => {
-    const q = search.toLowerCase()
     return features.filter(({ properties: p }) => {
       if (statusFilter !== 'all' && p.status !== statusFilter) return false
       if (landFilter !== 'all' && !(p.land || '').includes(landFilter)) return false
@@ -263,12 +276,9 @@ export default function ContractMapClient({ demo = false }) {
       if (matchFilter === 'niet' && ['volledig', 'deels'].includes(p.match)) return false
       if (actieFilter === 'open' && !p.openActies.length) return false
       if (actieFilter !== 'all' && actieFilter !== 'open' && !p.openActies.includes(actieFilter)) return false
-      if (!q) return true
-      return [p.contractNumber, p.customerName, p.kadastrale, p.debiteurnummer, p.kostenplaats].some((v) =>
-        (v || '').toLowerCase().includes(q)
-      )
+      return searchHits.has(p.id)
     })
-  }, [features, search, statusFilter, matchFilter, landFilter, actieFilter])
+  }, [features, searchHits, statusFilter, matchFilter, landFilter, actieFilter])
 
   const visibleIds = useMemo(() => new Set(filtered.map((f) => f.properties.id)), [filtered])
   const activeSelectedId = visibleIds.has(selectedId) ? selectedId : null
@@ -331,16 +341,13 @@ export default function ContractMapClient({ demo = false }) {
               {' · '}{counts.deels} deels · {counts.geen} niet in kadaster · {counts.onleesbaar} onleesbaar
             </p>
           )}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-            <input
-              type="search"
-              placeholder="Zoeken op nummer, klant, kadastraal..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+          <SmartSearch
+            value={search}
+            onChange={setSearch}
+            schema={contractSchema}
+            placeholder="Zoek: nummer, klant, kadaster, ov 2024, > 10k…"
+            resultCount={search ? filtered.length : null}
+          />
           <div className="flex gap-2">
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded-lg bg-white text-gray-700">
               <option value="all">Alle statussen</option>
@@ -406,6 +413,7 @@ export default function ContractMapClient({ demo = false }) {
                   <span className="truncate">{p.customerName}</span>
                   <span className="truncate text-right">{p.kadastrale || '—'}</span>
                 </div>
+                {hitNotes[p.id] && <p className="pl-5.5 text-xs text-emerald-700">{hitNotes[p.id].join(' · ')}</p>}
               </li>
             ))}
           </ul>
