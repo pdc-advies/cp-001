@@ -23,7 +23,7 @@ export default function Nav({ demo = false }) {
       {link('/customers', 'Klanten')}
       {link('/kaart', 'Kaart')}
       {link('/btw-codes', 'BTW Codes')}
-      {demo && link('/facturatie', 'Factuurrun')}
+      {demo && link('/facturatie', 'Terugvorderen Grondgebonden Heffingen')}
       {demo && link('/unit4', 'Unit4 (simulatie)')}
       {demo && link('/koppelingen', 'Koppelingen')}
     </nav>

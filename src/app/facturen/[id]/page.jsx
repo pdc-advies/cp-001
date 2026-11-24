@@ -9,7 +9,7 @@ import MessageList from '@/components/MessageList'
 import PrintButton from '@/components/PrintButton'
 
 export const dynamic = 'force-dynamic'
-export const metadata = { title: 'Factuur · Contract Register' }
+export const metadata = { title: 'Factuur · Contractenportaal' }
 
 // Het factuurdocument zoals de klant het krijgt, plus de koppelingsberichten van deze factuur
 export default async function InvoicePage({ params }) {

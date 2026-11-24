@@ -63,7 +63,7 @@ export function middleware(request) {
 
   return new NextResponse('Inloggen vereist', {
     status: 401,
-    headers: { 'WWW-Authenticate': 'Basic realm="Contract Register", charset="UTF-8"' },
+    headers: { 'WWW-Authenticate': 'Basic realm="Contractenportaal", charset="UTF-8"' },
   })
 }
 

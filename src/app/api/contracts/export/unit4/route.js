@@ -31,7 +31,7 @@ export async function GET() {
   for (const c of customers) customerMap[c.debiteurnummer] = c
 
   const wb = new ExcelJS.Workbook()
-  wb.creator = 'Contract Register'
+  wb.creator = 'Contractenportaal'
   wb.created = new Date()
 
   // ─── Sheet 1: Factuurregels ───────────────────────────────────────────────

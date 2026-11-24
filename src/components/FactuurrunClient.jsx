@@ -76,9 +76,9 @@ export default function FactuurrunClient() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-xl font-semibold text-gray-900">Factuurrun</h1>
+        <h1 className="text-xl font-semibold text-gray-900">Terugvorderen Grondgebonden Heffingen</h1>
         <p className="text-sm text-gray-500">
-          CP-001 bepaalt per periode welke contracten gefactureerd worden, maakt concepten uit de contractgegevens en stuurt ze na controle naar Unit4.
+          Factuurrun: het Contractenportaal bepaalt per periode welke contracten gefactureerd worden, maakt concepten uit de contractgegevens en stuurt ze na controle naar Unit4.
         </p>
       </div>
 

@@ -10,7 +10,7 @@ export default function MessageList({ messages, showInvoice = false }) {
           <details>
             <summary className="cursor-pointer flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
               <span className="text-xs text-gray-400 tabular-nums">{fmtDateTime(m.createdAt)}</span>
-              <span className={`text-xs font-medium ${m.direction.startsWith('CP-001') ? 'text-blue-700' : 'text-slate-700'}`}>{m.direction}</span>
+              <span className={`text-xs font-medium ${/^(CP-001|Contractenportaal)/.test(m.direction) ? 'text-blue-700' : 'text-slate-700'}`}>{m.direction.replaceAll('CP-001', 'Contractenportaal')}</span>
               <span className="text-gray-800">{m.operation}</span>
               <code className="text-xs text-gray-500">{m.method} {m.endpoint}</code>
               <span className={`text-xs font-medium ${m.httpStatus < 300 ? 'text-green-700' : 'text-red-700'}`}>{m.httpStatus}</span>

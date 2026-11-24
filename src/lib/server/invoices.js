@@ -132,7 +132,7 @@ export async function createTaxInvoice(contract, body, user) {
 export function salesInvoiceMessage(invoice, contract, { invoiceDate, dueDate }) {
   return {
     messageId: randomUUID(),
-    source: 'CP-001',
+    source: 'Contractenportaal',
     sentAt: new Date().toISOString(),
     invoice: {
       externalId: externalId(invoice.id),
