@@ -1,10 +1,13 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { FilePlus2, Send, Loader2 } from 'lucide-react'
 import { FREQUENTIES, periodsFor } from '@/lib/invoicing'
 import { StatusBadge, eur, invoiceKind } from '@/components/InvoiceStatus'
+import SmartSearch, { useUrlQuery } from '@/components/SmartSearch'
+import { searchRecords } from '@/lib/search'
+import { invoiceSchema, runRowSchema } from '@/lib/searchSchemas'
 
 const JAREN = [2025, 2026, 2027]
 const selectClass = 'px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
@@ -25,6 +28,7 @@ export default function FactuurrunClient() {
   const [concepts, setConcepts] = useState([])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
+  const [search, setSearch] = useUrlQuery()
 
   const periods = periodsFor(frequency, year)
 
@@ -69,6 +73,9 @@ export default function FactuurrunClient() {
   const ready = preview?.rows.filter((r) => r.state === 'gereed') ?? []
   const runConcepts = concepts.filter((c) => c.runKey === preview?.runKey)
   const otherConcepts = concepts.filter((c) => c.runKey !== preview?.runKey)
+  // Zoeken filtert alleen wat getoond wordt; de knoppen werken op de hele run
+  const shownRows = useMemo(() => (preview ? searchRecords(preview.rows, search, runRowSchema).map((r) => r.item) : []), [preview, search])
+  const shownOther = useMemo(() => searchRecords(otherConcepts, search, invoiceSchema).map((r) => r.item), [otherConcepts, search])
   const sendAll = (list) => act(async () => {
     for (const c of list) await call(`/api/invoices/${c.id}`, 'PATCH', { action: 'send' })
   })
@@ -118,6 +125,15 @@ export default function FactuurrunClient() {
         </div>
       </div>
 
+      <SmartSearch
+        value={search}
+        onChange={setSearch}
+        schema={runRowSchema}
+        placeholder="Zoek in deze run: contract, klant, gereed, > 5000…"
+        resultCount={search && preview ? shownRows.length : null}
+        className="max-w-md"
+      />
+
       {error && <div className="px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{error}</div>}
       {!preview && !error && <Loader2 className="w-5 h-5 mx-auto animate-spin text-gray-400" />}
 
@@ -138,7 +154,7 @@ export default function FactuurrunClient() {
               </tr>
             </thead>
             <tbody>
-              {preview.rows.map((r) => (
+              {shownRows.map((r) => (
                 <tr key={r.contractId} className="border-b border-gray-100 align-top">
                   <td className="px-4 py-2"><Link href={`/contracts/${r.contractId}#facturatie`} className="font-medium text-blue-700 hover:underline">{r.contractNumber}</Link></td>
                   <td className="px-4 py-2 text-gray-600">{r.customerName}</td>
@@ -172,7 +188,7 @@ export default function FactuurrunClient() {
             </button>
           </div>
           <ul className="divide-y divide-gray-100 text-sm">
-            {otherConcepts.map((c) => (
+            {shownOther.map((c) => (
               <li key={c.id} className="py-2 flex items-center gap-3">
                 <span className="text-xs text-gray-500 w-24">{invoiceKind(c)}</span>
                 <Link href={`/facturen/${c.id}`} className="text-blue-700 hover:underline">{c.contractNumber} · {c.periodLabel}</Link>

@@ -1,14 +1,14 @@
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { isDemo } from '@/lib/demo'
-import MessageList from '@/components/MessageList'
+import MessageSearch from '@/components/MessageSearch'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Koppelingen · Contractenportaal' }
 
 export default async function KoppelingenPage() {
   if (!isDemo()) notFound()
-  const messages = await prisma.interfaceMessage.findMany({ orderBy: { id: 'desc' }, take: 200 })
+  const messages = await prisma.interfaceMessage.findMany({ orderBy: { id: 'desc' }, take: 1000 })
   return (
     <div className="space-y-5">
       <div>
@@ -18,7 +18,7 @@ export default async function KoppelingenPage() {
         </p>
       </div>
       <div className="bg-white rounded-xl border border-gray-200 p-5">
-        <MessageList messages={JSON.parse(JSON.stringify(messages))} showInvoice />
+        <MessageSearch messages={JSON.parse(JSON.stringify(messages))} showInvoice />
       </div>
     </div>
   )

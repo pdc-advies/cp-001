@@ -1,7 +1,10 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { Plus, Pencil, Trash2, Percent } from 'lucide-react'
+import SmartSearch, { useUrlQuery } from './SmartSearch'
+import { searchRecords } from '@/lib/search'
+import { btwSchema } from '@/lib/searchSchemas'
 
 const inputClass = 'w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500'
 
@@ -70,6 +73,7 @@ function Modal({ code, onClose, onSave }) {
 
 export default function BtwCodesClient({ initialCodes }) {
   const [codes, setCodes] = useState(initialCodes)
+  const [search, setSearch] = useUrlQuery()
   const [modal, setModal] = useState({ open: false, code: null })
   const [deleting, setDeleting] = useState(null)
 
@@ -85,6 +89,8 @@ export default function BtwCodesClient({ initialCodes }) {
     finally { setDeleting(null) }
   }
 
+  const shown = useMemo(() => searchRecords(codes, search, btwSchema).map(r => r.item), [codes, search])
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -98,6 +104,17 @@ export default function BtwCodesClient({ initialCodes }) {
         </button>
       </div>
 
+      <div className="flex items-start gap-3 mb-4">
+        <SmartSearch
+          value={search}
+          onChange={setSearch}
+          schema={btwSchema}
+          placeholder="Zoek: code, omschrijving, 21%…"
+          resultCount={search ? shown.length : null}
+          className="flex-1 min-w-64 max-w-md"
+        />
+      </div>
+
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
@@ -109,14 +126,14 @@ export default function BtwCodesClient({ initialCodes }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {codes.length === 0 ? (
+            {shown.length === 0 ? (
               <tr>
                 <td colSpan={4} className="px-4 py-10 text-center">
                   <Percent className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                  <p className="text-gray-400 text-sm">Nog geen BTW codes aangemaakt</p>
+                  <p className="text-gray-400 text-sm">{codes.length ? 'Geen BTW codes gevonden' : 'Nog geen BTW codes aangemaakt'}</p>
                 </td>
               </tr>
-            ) : codes.map(c => (
+            ) : shown.map(c => (
               <tr key={c.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-4 py-3 font-mono font-semibold text-gray-800">{c.code}</td>
                 <td className="px-4 py-3 text-gray-700">{c.description}</td>
